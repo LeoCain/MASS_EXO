@@ -48,8 +48,11 @@ source /path/to/venv/bin/activate
 
 pytorch(https://pytorch.org/)
 Weird issue with torchvision can cause an error which mentions failing to "load image python extension." if you get this error, ive found the following versions seem to work:
+
 *torch*: 1.11.0
+
 *torchvision*: 0.12.0
+
 *cuda*: 10.2
 
 ### Other imports with pip
