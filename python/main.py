@@ -19,6 +19,7 @@ import torchvision.transforms as T
 import numpy as np
 import pymss
 from Model import *
+
 use_cuda = torch.cuda.is_available()
 FloatTensor = torch.cuda.FloatTensor if use_cuda else torch.FloatTensor
 LongTensor = torch.cuda.LongTensor if use_cuda else torch.LongTensor
