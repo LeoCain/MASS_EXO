@@ -363,7 +363,7 @@ class PPO(object):
 
 import matplotlib
 import matplotlib.pyplot as plt
-
+plt.style.use('ggplot')
 plt.ion()
 
 def Plot(y,title,num_fig=1,ylim=True):
@@ -379,14 +379,17 @@ def Plot(y,title,num_fig=1,ylim=True):
 	plt.figure(num_fig)
 	plt.clf()
 	plt.title(title)
+	plt.xlabel("Number of Episodes")
+	plt.ylabel("Average Cumulative Reward per Episode")
 	plt.plot(y,'b')
 	
 	plt.plot(temp_y,'r')
 
-	plt.show()
+	# plt.show()
 	if ylim:
 		plt.ylim([0,1])
 	plt.pause(0.001)
+	plt.savefig('../png/Reward_Graph.png')
 
 import argparse
 import os
@@ -403,7 +406,7 @@ if __name__=="__main__":
 	ppo = PPO(args.meta)
 	nn_dir = '../nn'
 	if not os.path.exists(nn_dir):
-	    os.makedirs(nn_dir)
+		os.makedirs(nn_dir)
 	if args.model is not None:
 		ppo.LoadModel(args.model)
 	else:
@@ -412,4 +415,4 @@ if __name__=="__main__":
 	for i in range(ppo.max_iteration-5):
 		ppo.Train()
 		rewards = ppo.Evaluate()
-		Plot(rewards,'reward',0,False)
+		Plot(rewards,'Episode Reward vs Number of Simulated Episodes',0,False)

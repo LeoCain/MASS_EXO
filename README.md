@@ -5,6 +5,8 @@
 
 This code implements a basic simulation and control for full-body **Musculoskeletal** system. Skeletal movements are driven by the actuation of the muscles, coordinated by activation levels. Interfacing with python and pytorch, it is available to use Deep Reinforcement Learning(DRL) algorithm such as Proximal Policy Optimization(PPO).
 
+This fork aims to use this existing repo as part of an AI project which aims to train an EXO agent for stroke rehabilitation
+
 ## Publications
 
 Seunghwan Lee, Kyoungmin Lee, Moonseok Park, and Jehee Lee 
@@ -27,19 +29,33 @@ sudo apt-get install libtinyxml-dev libeigen3-dev libxi-dev libxmu-dev freeglut3
 
 ### Install DART 6.8
 
+You will need to install DART for C++ for this project. If installing dartpy (as an extra), make sure you are not using conda or venv, as this will cause a problem with the install, and make it veyr difficult to re-install dartpy (I have not found a solve yet).
+
 Please refer to http://dartsim.github.io/ (Install version 6.8)
 
 Manual from DART(http://dartsim.github.io/install_dart_on_ubuntu.html)
 
 
-### Install PIP things
+### Venv
 
-You should first activate virtualenv.
+You could activate venv if you like:
 ```bash
 virtualenv /path/to/venv --python=python3
 source /path/to/venv/bin/activate
 ```
-- pytorch(https://pytorch.org/)
+
+### Pytorch
+
+pytorch(https://pytorch.org/)
+Weird issue with torchvision can cause an error which mentions failing to "load image python extension." if you get this error, ive found the following versions seem to work:
+
+*torch*: 1.11.0
+
+*torchvision*: 0.12.0
+
+*cuda*: 10.2
+
+### Other imports with pip
 
 - numpy, matplotlib
 
@@ -51,12 +67,14 @@ pip3 install numpy matplotlib ipython
 
 ### Resource
 
-Our system require a reference motion to imitate. We provide sample references such as walking, running, and etc... 
+Our system requires a reference motion to imitate. We provide sample references such as walking, running, and etc... 
 
 To learn and simulate, we should provide such a meta data. We provide default meta data in /data/metadata.txt. We parse the text and set the environment. Please note that the learning settings and the test settings should be equal.(metadata.txt should not be changed.)
 
 
 ### Compile and Run
+
+Navigate to the MASS_EXO folder, after cloning the repo:
 
 ```bash
 mkdir build
@@ -68,7 +86,7 @@ make -j8
 - Run Training
 ```bash
 cd python
-source /path/to/virtualenv/
+source /path/to/virtualenv/ # Only necessary if using venv
 python3 main.py -d ../data/metadata.txt
 ```
 
@@ -76,14 +94,14 @@ All the training networks are saved in /nn folder.
 
 - Run UI
 ```bash
-source /path/to/virtualenv/
+source /path/to/virtualenv/ # Only necessary if using venv
 ./render/render ../data/metadata.txt
 ```
 
 - Run Trained data
 ```bash
 source /path/to/virtualenv/
-./render/render ../data/metadata.txt ../nn/xxx.pt ../nn/xxx_muscle.pt
+./render/render ../data/metadata.txt ../nn/max.pt ../nn/max_muscle.pt
 ```
 
 If you are simulating with the torque-actuated model, 
