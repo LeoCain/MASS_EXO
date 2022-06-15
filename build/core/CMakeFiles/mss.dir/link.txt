@@ -1,0 +1,2 @@
+/usr/bin/ar qc ../../core/libmss.a  CMakeFiles/mss.dir/BVH.cpp.o CMakeFiles/mss.dir/Character.cpp.o CMakeFiles/mss.dir/DARTHelper.cpp.o CMakeFiles/mss.dir/Environment.cpp.o CMakeFiles/mss.dir/Muscle.cpp.o
+/usr/bin/ranlib ../../core/libmss.a
