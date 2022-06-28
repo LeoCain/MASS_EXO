@@ -20,22 +20,24 @@ import numpy as np
 import pymss
 from Model import *
 
+# Set tensors based on whether GPU with cuda is available
 use_cuda = torch.cuda.is_available()
 FloatTensor = torch.cuda.FloatTensor if use_cuda else torch.FloatTensor
 LongTensor = torch.cuda.LongTensor if use_cuda else torch.LongTensor
 ByteTensor = torch.cuda.ByteTensor if use_cuda else torch.ByteTensor
 Tensor = FloatTensor
+
 Episode = namedtuple('Episode',('s','a','r', 'value', 'logprob'))
 class EpisodeBuffer(object):
 	def __init__(self):
 		self.data = []
-
 	def Push(self, *args):
 		self.data.append(Episode(*args))
 	def Pop(self):
 		self.data.pop()
 	def GetData(self):
 		return self.data
+
 MuscleTransition = namedtuple('MuscleTransition',('JtA','tau_des','L','b'))
 class MuscleBuffer(object):
 	def __init__(self, buff_size = 10000):
@@ -47,6 +49,7 @@ class MuscleBuffer(object):
 
 	def Clear(self):
 		self.buffer.clear()
+
 Transition = namedtuple('Transition',('s','a', 'logprob', 'TD', 'GAE'))
 class ReplayBuffer(object):
 	def __init__(self, buff_size = 10000):
@@ -58,6 +61,7 @@ class ReplayBuffer(object):
 
 	def Clear(self):
 		self.buffer.clear()
+
 class PPO(object):
 	def __init__(self,meta_file):
 		np.random.seed(seed = int(time.time()))
@@ -171,6 +175,7 @@ class PPO(object):
 		self.muscle_buffer['L'] = self.env.GetMuscleTuplesL()
 		self.muscle_buffer['b'] = self.env.GetMuscleTuplesb()
 		print(self.muscle_buffer['JtA'].shape)
+
 	def GenerateTransitions(self):
 		self.total_episodes = []
 		states = [None]*self.num_slaves
@@ -317,6 +322,7 @@ class PPO(object):
 			print('Optimizing muscle nn : {}/{}'.format(j+1,self.num_epochs_muscle),end='\r')
 		self.loss_muscle = loss.cpu().detach().numpy().tolist()
 		print('')
+		
 	def OptimizeModel(self):
 		self.ComputeTDandGAE()
 		self.OptimizeSimulationNN()
@@ -395,14 +401,17 @@ def Plot(y,title,num_fig=1,ylim=True):
 import argparse
 import os
 if __name__=="__main__":
+	# Observe and label command line arguments
 	parser = argparse.ArgumentParser()
 	parser.add_argument('-m','--model',help='model path')
 	parser.add_argument('-d','--meta',help='meta file')
 
-	args =parser.parse_args()
+	# Check that a meta filepath ahs been supplied
+	args = parser.parse_args()
 	if args.meta is None:
 		print('Provide meta file')
 		exit()
+
 
 	ppo = PPO(args.meta)
 	nn_dir = '../nn'
