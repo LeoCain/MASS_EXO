@@ -1,0 +1,21 @@
+{
+    "files.associations": {
+        "*.tcc": "cpp",
+        "bitset": "cpp",
+        "deque": "cpp",
+        "list": "cpp",
+        "string": "cpp",
+        "vector": "cpp",
+        "attributedispatchers": "cpp",
+        "mixinvector": "cpp",
+        "nodevisitor": "cpp",
+        "polytope": "cpp",
+        "primitiveset": "cpp",
+        "program": "cpp",
+        "renderinfo": "cpp",
+        "shape": "cpp",
+        "state": "cpp",
+        "valuestack": "cpp",
+        "fast_back_stack": "cpp"
+    }
+}

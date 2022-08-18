@@ -18,11 +18,13 @@ set(CMAKE_TARGET_DEFINITIONS_CXX
   "BOOST_FILESYSTEM_DYN_LINK"
   "BOOST_SYSTEM_DYN_LINK"
   "BOOST_TEST_DYN_LINK"
+  "IMGUI_DISABLE_OBSOLETE_FUNCTIONS"
   "MASS_ROOT_DIR=\"/home/medicalrobotics/MASS_EXO\""
   )
 
 # The include file search paths:
 set(CMAKE_CXX_TARGET_INCLUDE_PATH
+  "/usr/include/python3.8"
   "/usr/include/eigen3"
   "/usr/include/bullet"
   )

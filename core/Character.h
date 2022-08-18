@@ -13,6 +13,7 @@ public:
 
 	void LoadSkeleton(const std::string& path,bool create_obj = false);
 	void LoadMuscles(const std::string& path);
+	dart::dynamics::SkeletonPtr LoadExo(const std::string& path);
 	void LoadBVH(const std::string& path,bool cyclic=true);
 
 	void Reset();	

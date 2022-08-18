@@ -2,6 +2,7 @@
 #include "BVH.h"
 #include "DARTHelper.h"
 #include "Muscle.h"
+#include <dart/utils/urdf/DartLoader.hpp>
 #include <tinyxml.h>
 using namespace dart;
 using namespace dart::dynamics;
@@ -46,6 +47,7 @@ void
 Character::
 LoadMuscles(const std::string& path)
 {
+	
 	TiXmlDocument doc;
 	if(!doc.LoadFile(path)){
 		std::cout << "Can't open file : " << path << std::endl;
@@ -82,6 +84,33 @@ LoadMuscles(const std::string& path)
 	
 
 }
+
+
+// TODO
+dart::dynamics::SkeletonPtr
+Character::
+LoadExo(const std::string& path)
+{	
+	// load the exo model
+	dart::utils::DartLoader loader;
+    dart::dynamics::SkeletonPtr model = loader.parseSkeleton("/home/medicalrobotics/MASS_EXO/data/exo_model.xml");
+    model->setName("model");
+
+    // Position its base in a reasonable way
+    Eigen::Isometry3d tf = Eigen::Isometry3d::Identity();
+    tf.translation() = Eigen::Vector3d(-0.65, 0.0, 0.0);
+    model->getJoint(0)->setTransformFromParentBodyNode(tf);
+
+    // Get it into a useful configuration
+    model->getDof(1)->setPosition(140.0 * M_PI / 180.0);
+    model->getDof(2)->setPosition(-140.0 * M_PI / 180.0);
+
+	return model;
+	
+}
+
+
+
 void
 Character::
 LoadBVH(const std::string& path,bool cyclic)

@@ -28,6 +28,7 @@ def weights_init(m):
 	if classname.find('Linear') != -1:
 		torch.nn.init.xavier_uniform_(m.weight)
 		m.bias.data.zero_()
+		
 class MuscleNN(nn.Module):
 	def __init__(self,num_total_muscle_related_dofs,num_dofs,num_muscles):
 		super(MuscleNN,self).__init__()

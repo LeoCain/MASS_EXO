@@ -56,6 +56,52 @@ CMAKE_BINARY_DIR = /home/medicalrobotics/MASS_EXO/build
 #=============================================================================
 # Targets provided globally by CMake.
 
+# Special rule for the target install/strip
+install/strip: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing the project stripped..."
+	/usr/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
+.PHONY : install/strip
+
+# Special rule for the target install/strip
+install/strip/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing the project stripped..."
+	/usr/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
+.PHONY : install/strip/fast
+
+# Special rule for the target install/local
+install/local: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing only the local directory..."
+	/usr/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
+.PHONY : install/local
+
+# Special rule for the target install/local
+install/local/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing only the local directory..."
+	/usr/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
+.PHONY : install/local/fast
+
+# Special rule for the target install
+install: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Install the project..."
+	/usr/bin/cmake -P cmake_install.cmake
+.PHONY : install
+
+# Special rule for the target install
+install/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Install the project..."
+	/usr/bin/cmake -P cmake_install.cmake
+.PHONY : install/fast
+
+# Special rule for the target list_install_components
+list_install_components:
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Available install components are: \"Unspecified\""
+.PHONY : list_install_components
+
+# Special rule for the target list_install_components
+list_install_components/fast: list_install_components
+
+.PHONY : list_install_components/fast
+
 # Special rule for the target rebuild_cache
 rebuild_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
@@ -111,6 +157,19 @@ depend:
 .PHONY : depend
 
 #=============================================================================
+# Target rules for targets named load_model
+
+# Build rule for target.
+load_model: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 load_model
+.PHONY : load_model
+
+# fast build rule for target.
+load_model/fast:
+	$(MAKE) -f CMakeFiles/load_model.dir/build.make CMakeFiles/load_model.dir/build
+.PHONY : load_model/fast
+
+#=============================================================================
 # Target rules for targets named mss
 
 # Build rule for target.
@@ -137,6 +196,19 @@ render/fast:
 .PHONY : render/fast
 
 #=============================================================================
+# Target rules for targets named display_model
+
+# Build rule for target.
+display_model: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 display_model
+.PHONY : display_model
+
+# fast build rule for target.
+display_model/fast:
+	$(MAKE) -f python/CMakeFiles/display_model.dir/build.make python/CMakeFiles/display_model.dir/build
+.PHONY : display_model/fast
+
+#=============================================================================
 # Target rules for targets named pymss
 
 # Build rule for target.
@@ -149,17 +221,53 @@ pymss/fast:
 	$(MAKE) -f python/CMakeFiles/pymss.dir/build.make python/CMakeFiles/pymss.dir/build
 .PHONY : pymss/fast
 
+data/load_model.o: data/load_model.cpp.o
+
+.PHONY : data/load_model.o
+
+# target to build an object file
+data/load_model.cpp.o:
+	$(MAKE) -f CMakeFiles/load_model.dir/build.make CMakeFiles/load_model.dir/data/load_model.cpp.o
+.PHONY : data/load_model.cpp.o
+
+data/load_model.i: data/load_model.cpp.i
+
+.PHONY : data/load_model.i
+
+# target to preprocess a source file
+data/load_model.cpp.i:
+	$(MAKE) -f CMakeFiles/load_model.dir/build.make CMakeFiles/load_model.dir/data/load_model.cpp.i
+.PHONY : data/load_model.cpp.i
+
+data/load_model.s: data/load_model.cpp.s
+
+.PHONY : data/load_model.s
+
+# target to generate assembly for a file
+data/load_model.cpp.s:
+	$(MAKE) -f CMakeFiles/load_model.dir/build.make CMakeFiles/load_model.dir/data/load_model.cpp.s
+.PHONY : data/load_model.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
 	@echo "... all (the default if no target is provided)"
 	@echo "... clean"
 	@echo "... depend"
+	@echo "... install/strip"
+	@echo "... install/local"
+	@echo "... install"
+	@echo "... list_install_components"
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
+	@echo "... load_model"
 	@echo "... mss"
 	@echo "... render"
+	@echo "... display_model"
 	@echo "... pymss"
+	@echo "... data/load_model.o"
+	@echo "... data/load_model.i"
+	@echo "... data/load_model.s"
 .PHONY : help
 
 

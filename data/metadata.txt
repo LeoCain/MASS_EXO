@@ -1,7 +1,8 @@
 use_muscle true
 con_hz 30
 sim_hz 600
-skel_file /data/human_test.xml
-muscle_file /data/muscle_test.xml
+skel_file /data/human_exo.xml
+muscle_file /data/muscle_exo.xml
+exo_file /data/exo_model.xml
 bvh_file /data/motion/walk.bvh true
 reward_param 0.75 0.1 0.0 0.15

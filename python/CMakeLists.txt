@@ -30,3 +30,9 @@ add_library(pymss SHARED ${srcs})
 
 target_link_libraries(pymss ${DART_LIBRARIES} ${PYTHON_LIBRARIES} mss pybind11::module)
 set_target_properties(pymss PROPERTIES PREFIX "" )
+
+add_executable(display_model ../data/load_model.cpp)
+target_link_libraries(display_model ${DART_LIBRARIES} ${PYTHON_LIBRARIES} mss pybind11::module)
+set_target_properties(display_model PROPERTIES PREFIX "" )
+
+install(TARGETS display_model DESTINATION build/)

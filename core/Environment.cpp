@@ -11,7 +11,7 @@ using namespace MASS;
 
 Environment::
 Environment()
-	:mControlHz(30),mSimulationHz(900),mWorld(std::make_shared<World>()),mUseMuscle(true),w_q(0.65),w_v(0.1),w_ee(0.15),w_com(0.1)
+	:mControlHz(30),mSimulationHz(900),mWorld(std::make_shared<World>()),mUseMuscle(true),w_q(0.65),w_v(0.1),w_ee(0.15),w_com(0.1)	// numbers in brackets??
 {
 
 }
@@ -75,6 +75,12 @@ Initialize(const std::string& meta_file,bool load_obj)
 			if(this->GetUseMuscle())
 				character->LoadMuscles(std::string(MASS_ROOT_DIR)+str2);
 		}
+		else if(!index.compare("exo_file")){
+			std::string str2;
+			printf("In\n");
+			ss>>str2;
+			exo_model = character->LoadExo(std::string(MASS_ROOT_DIR)+str2);
+		}
 		else if(!index.compare("bvh_file")){
 			std::string str2,str3;
 
@@ -134,6 +140,7 @@ Initialize()
 	mWorld->setGravity(Eigen::Vector3d(0,-9.8,0.0));
 	mWorld->setTimeStep(1.0/mSimulationHz);
 	mWorld->getConstraintSolver()->setCollisionDetector(dart::collision::BulletCollisionDetector::create());
+	mWorld->addSkeleton(exo_model);
 	mWorld->addSkeleton(mCharacter->GetSkeleton());
 	mWorld->addSkeleton(mGround);
 	mAction = Eigen::VectorXd::Zero(mNumActiveDof);
@@ -155,7 +162,7 @@ Reset(bool RSI)
 
 	if(RSI)
 		t = dart::math::random(0.0,mCharacter->GetBVH()->GetMaxTime()*0.9);
-	mWorld->setTime(t);
+	mWorld->setTime(t); 
 	mCharacter->Reset();
 
 	mAction.setZero();
@@ -338,59 +345,74 @@ SetAction(const Eigen::VectorXd& a)
 	mRandomSampleIndex = rand()%(mSimulationHz/mControlHz);
 	mAverageActivationLevels.setZero();
 }
+
+/**
+ * @brief Function to calculate the current reward.
+ * 
+ * @return double representation of the reward.
+ */
 double 
 Environment::
 GetReward()
 {
-	auto& skel = mCharacter->GetSkeleton();
+	auto& skel = mCharacter->GetSkeleton();	// Retrieves the simulation model
 
-	Eigen::VectorXd cur_pos = skel->getPositions();
-	Eigen::VectorXd cur_vel = skel->getVelocities();
+	Eigen::VectorXd cur_pos = skel->getPositions();		// Retrieves the current joint positions of the simulation
+	Eigen::VectorXd cur_vel = skel->getVelocities();	// Retrieves the current joint velocities of the simulation
 
-	Eigen::VectorXd p_diff_all = skel->getPositionDifferences(mTargetPositions,cur_pos);
-	Eigen::VectorXd v_diff_all = skel->getPositionDifferences(mTargetVelocities,cur_vel);
-
+	Eigen::VectorXd p_diff_all = skel->getPositionDifferences(mTargetPositions,cur_pos);	// Compute the difference between actual and target joint positions
+	Eigen::VectorXd v_diff_all = skel->getPositionDifferences(mTargetVelocities,cur_vel);	// Compute the difference between actual and target joint velocities
+	
+	// Make zero vectors of size equal to the number of DOFs. One for position difference, one for velocity difference:
 	Eigen::VectorXd p_diff = Eigen::VectorXd::Zero(skel->getNumDofs());
 	Eigen::VectorXd v_diff = Eigen::VectorXd::Zero(skel->getNumDofs());
 
-	const auto& bvh_map = mCharacter->GetBVH()->GetBVHMap();
+	const auto& bvh_map = mCharacter->GetBVH()->GetBVHMap();	// ????
 
 	for(auto ss : bvh_map)
 	{
-		auto joint = mCharacter->GetSkeleton()->getBodyNode(ss.first)->getParentJoint();
-		int idx = joint->getIndexInSkeleton(0);
+		auto joint = mCharacter->GetSkeleton()->getBodyNode(ss.first)->getParentJoint();	// index thru each joint
+		int idx = joint->getIndexInSkeleton(0);	// Retrieve index of joint, so it can be found in p_diff_all
 		if(joint->getType()=="FreeJoint")
-			continue;
+			continue;	// if the joint is a 'FreeJoint' leave its corresponding p_diff = to 0
 		else if(joint->getType()=="RevoluteJoint")
-			p_diff[idx] = p_diff_all[idx];
+			p_diff[idx] = p_diff_all[idx];	// if the joint is a 'RevoluteJoint' set p_diff = to the difference between target and actual pos
 		else if(joint->getType()=="BallJoint")
-			p_diff.segment<3>(idx) = p_diff_all.segment<3>(idx);
+			p_diff.segment<3>(idx) = p_diff_all.segment<3>(idx);	// 'BallJoint' can rotate on 3 axis -> 3 numbers to describe positional differences
 	}
 
-	auto ees = mCharacter->GetEndEffectors();
-	Eigen::VectorXd ee_diff(ees.size()*3);
-	Eigen::VectorXd com_diff;
+	// ????
+	auto ees = mCharacter->GetEndEffectors();	// list of end effector objects/positions?
+	Eigen::VectorXd ee_diff(ees.size()*3);		// make a vector 3 times the size of end effector list, for recording end effector position difference in all 3 directions?
+	Eigen::VectorXd com_diff;					// initialise a vector for the difference between target and actual centre of mass?
 
 	for(int i =0;i<ees.size();i++)
-		ee_diff.segment<3>(i*3) = ees[i]->getCOM();
-	com_diff = skel->getCOM();
+		ee_diff.segment<3>(i*3) = ees[i]->getCOM();	// Retrieve the position of the C.O.M. of each end effector
+	com_diff = skel->getCOM();						// Retrieve the position of the C.O.M. of the whole sim
 
-	skel->setPositions(mTargetPositions);
+	// For calculation purposes, move the simulation to the target positions:
+	skel->setPositions(mTargetPositions);				
 	skel->computeForwardKinematics(true,false,false);
 
+	// Now that the model is moved to the target position, we can find the difference between
+	// Target C.O.M./E.E. positions and actual positions:
 	com_diff -= skel->getCOM();
 	for(int i=0;i<ees.size();i++)
-		ee_diff.segment<3>(i*3) -= ees[i]->getCOM()+com_diff;
+		ee_diff.segment<3>(i*3) -= ees[i]->getCOM()+com_diff;	// com_diff is added here to account for the movement of the whole model -> 
+																// does this imply that the E.E. position is described relative to the C.O.M.? 
 
+	// Now that the calculations are done, put the model back to the actual position:
 	skel->setPositions(cur_pos);
 	skel->computeForwardKinematics(true,false,false);
 
+	// The norm of the differences are found. I think the second parameter is a weighting for the value, but I am unsure because
+	// weights are applied when computing the reward on line 410 (w_q, w_v are weights)
 	double r_q = exp_of_squared(p_diff,2.0);
-	double r_v = exp_of_squared(v_diff,0.1);
-	double r_ee = exp_of_squared(ee_diff,40.0);
+	double r_v = exp_of_squared(v_diff,0.1);		// isn't v_diff just a vector of zeros at this point?
+	double r_ee = exp_of_squared(ee_diff,40.0);	
 	double r_com = exp_of_squared(com_diff,10.0);
 
-	double r = r_ee*(w_q*r_q + w_v*r_v);
-
+	double r = r_ee*(w_q*r_q + w_v*r_v);			// Why is r_com computed, but not used -> accounted for indirectly by r_ee? 
+													// even so, why would you compute it then?
 	return r;
 }
