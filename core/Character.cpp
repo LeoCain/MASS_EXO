@@ -136,22 +136,30 @@ SetPDParameters(double kp, double kv)
 	mKp = Eigen::VectorXd::Constant(dof,kp);	
 	mKv = Eigen::VectorXd::Constant(dof,kv);	
 }
+/**
+ * @brief: Potentially the function to modify with augmented exo torque?
+ * 
+ * @param p_desired: desired position maybe?
+ * @return: Eigen::VectorXd which describes the joint torques (maybe?)
+ */
 Eigen::VectorXd
 Character::
 GetSPDForces(const Eigen::VectorXd& p_desired)
 {
-	Eigen::VectorXd q = mSkeleton->getPositions();
-	Eigen::VectorXd dq = mSkeleton->getVelocities();
-	double dt = mSkeleton->getTimeStep();
+	Eigen::VectorXd q = mSkeleton->getPositions();		// Retrieve the current joint positions
+	Eigen::VectorXd dq = mSkeleton->getVelocities();	// Retrieve the current joint velocities
+	double dt = mSkeleton->getTimeStep();				// Retrieve the size of the time step
 	// Eigen::MatrixXd M_inv = mSkeleton->getInvMassMatrix();
-	Eigen::MatrixXd M_inv = (mSkeleton->getMassMatrix() + Eigen::MatrixXd(dt*mKv.asDiagonal())).inverse();
+	Eigen::MatrixXd M_inv = (mSkeleton->getMassMatrix() + Eigen::MatrixXd(dt*mKv.asDiagonal())).inverse();	// mass matrix and something else inverted?
+																											// some form of inertial/momentum adjustment?
 
-	Eigen::VectorXd qdqdt = q + dq*dt;
+	Eigen::VectorXd qdqdt = q + dq*dt;	// Compute the new position of the joints, assuming constant velocity during this time step.
 
 	Eigen::VectorXd p_diff = -mKp.cwiseProduct(mSkeleton->getPositionDifferences(qdqdt,p_desired));
 	Eigen::VectorXd v_diff = -mKv.cwiseProduct(dq);
-	Eigen::VectorXd ddq = M_inv*(-mSkeleton->getCoriolisAndGravityForces()+p_diff+v_diff+mSkeleton->getConstraintForces());
+	Eigen::VectorXd ddq = M_inv*(-mSkeleton->getCoriolisAndGravityForces()+p_diff+v_diff+mSkeleton->getConstraintForces());	// a = F/M or ddtheta = T/I?
 
+	Eigen::VectorXd mod = [1000, 1000, 1000, 1000];
 	Eigen::VectorXd tau = p_diff + v_diff - dt*mKv.cwiseProduct(ddq);
 
 	tau.head<6>().setZero();

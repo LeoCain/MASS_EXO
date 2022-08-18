@@ -16,31 +16,41 @@ Environment()
 
 }
 
+/**
+ * @brief: Loads the parameter file, and configures the environment accordingly
+ * 
+ * @param meta_file: Parameter file containing configuration information
+ * @param load_obj: ????
+ */
 void
 Environment::
 Initialize(const std::string& meta_file,bool load_obj)
 {
-	std::ifstream ifs(meta_file);
-	if(!(ifs.is_open()))
+	std::ifstream ifs(meta_file);	// Input stream class is created so meta_file can be read/operated on
+	if(!(ifs.is_open()))	// Self-exlanatory
 	{
 		std::cout<<"Can't read file "<<meta_file<<std::endl;
 		return;
 	}
-	std::string str;
-	std::string index;
-	std::stringstream ss;
-	MASS::Character* character = new MASS::Character();
-	while(!ifs.eof())
+	std::string str;		// String initialised to store each line of file.
+	std::string index;		// String initialised to store the first word of each line.
+	std::stringstream ss;	// stringstream object used as a buffer such that each word of the current line can be examined separately.
+	MASS::Character* character = new MASS::Character();	// create a new MASS character object pointer.
+	while(!ifs.eof())	// While not at the end of file:
 	{
+		// Clear all veriables from previous loop:
 		str.clear();
 		index.clear();
 		ss.clear();
 
-		std::getline(ifs,str);
-		ss.str(str);
-		ss>>index;
+		std::getline(ifs,str);	// Assign entire current line to str String.
+		ss.str(str);			// Save current line to stringstream ss, so each word can be indexed.
+		ss>>index;				// Assign the first word on this line to the index String.
+		// Use index.compare() to check which parameter is being set on this line (if index.compare("str") returns 0, current word matches "str").
+		// A switch case might be better here
 		if(!index.compare("use_muscle"))
 		{	
+			// Use the stringstream ss to check the next word, and initialise this parameter appropriately
 			std::string str2;
 			ss>>str2;
 			if(!str2.compare("true"))
@@ -81,7 +91,7 @@ Initialize(const std::string& meta_file,bool load_obj)
 			ss>>str2;
 			exo_model = character->LoadExo(std::string(MASS_ROOT_DIR)+str2);
 		}
-		else if(!index.compare("bvh_file")){
+		else if(!index.compare("bvh_file")){	// This is the reference motion file.
 			std::string str2,str3;
 
 			ss>>str2>>str3;
@@ -140,7 +150,7 @@ Initialize()
 	mWorld->setGravity(Eigen::Vector3d(0,-9.8,0.0));
 	mWorld->setTimeStep(1.0/mSimulationHz);
 	mWorld->getConstraintSolver()->setCollisionDetector(dart::collision::BulletCollisionDetector::create());
-	mWorld->addSkeleton(exo_model);
+	// mWorld->addSkeleton(exo_model);
 	mWorld->addSkeleton(mCharacter->GetSkeleton());
 	mWorld->addSkeleton(mGround);
 	mAction = Eigen::VectorXd::Zero(mNumActiveDof);
