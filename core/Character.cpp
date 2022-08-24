@@ -159,8 +159,11 @@ GetSPDForces(const Eigen::VectorXd& p_desired)
 	Eigen::VectorXd v_diff = -mKv.cwiseProduct(dq);
 	Eigen::VectorXd ddq = M_inv*(-mSkeleton->getCoriolisAndGravityForces()+p_diff+v_diff+mSkeleton->getConstraintForces());	// a = F/M or ddtheta = T/I?
 
-	Eigen::VectorXd mod = [1000, 1000, 1000, 1000];
-	Eigen::VectorXd tau = p_diff + v_diff - dt*mKv.cwiseProduct(ddq);
+	Eigen::VectorXd mod = Eigen::VectorXd::Zero(p_diff.size()); // size is 56 = number of DOFs??
+	// std::cout << "*=====================" << p_diff.size() << "=========================*";
+	mod << 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000;
+	Eigen::VectorXd tau = p_diff + v_diff + mod - dt*mKv.cwiseProduct(ddq);
+	// Eigen::VectorXd tau = mod;
 
 	tau.head<6>().setZero();
 

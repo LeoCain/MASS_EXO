@@ -24,35 +24,27 @@ initializer_list
 dart/dart.hpp
 /home/medicalrobotics/MASS_EXO/core/dart/dart.hpp
 
-/home/medicalrobotics/MASS_EXO/core/Character.h
-dart/dart.hpp
-/home/medicalrobotics/MASS_EXO/core/dart/dart.hpp
-
-/home/medicalrobotics/MASS_EXO/core/DARTHelper.h
-dart/dart.hpp
-/home/medicalrobotics/MASS_EXO/core/dart/dart.hpp
-
-/home/medicalrobotics/MASS_EXO/core/Environment.cpp
-Environment.h
-/home/medicalrobotics/MASS_EXO/core/Environment.h
-DARTHelper.h
-/home/medicalrobotics/MASS_EXO/core/DARTHelper.h
+/home/medicalrobotics/MASS_EXO/core/Character.cpp
 Character.h
 /home/medicalrobotics/MASS_EXO/core/Character.h
 BVH.h
 /home/medicalrobotics/MASS_EXO/core/BVH.h
+DARTHelper.h
+/home/medicalrobotics/MASS_EXO/core/DARTHelper.h
 Muscle.h
 /home/medicalrobotics/MASS_EXO/core/Muscle.h
-dart/collision/bullet/bullet.hpp
-/home/medicalrobotics/MASS_EXO/core/dart/collision/bullet/bullet.hpp
+dart/utils/urdf/DartLoader.hpp
+-
+tinyxml.h
+-
 
-/home/medicalrobotics/MASS_EXO/core/Environment.h
+/home/medicalrobotics/MASS_EXO/core/Character.h
 dart/dart.hpp
 /home/medicalrobotics/MASS_EXO/core/dart/dart.hpp
-Character.h
-/home/medicalrobotics/MASS_EXO/core/Character.h
-Muscle.h
-/home/medicalrobotics/MASS_EXO/core/Muscle.h
+
+/home/medicalrobotics/MASS_EXO/core/DARTHelper.h
+dart/dart.hpp
+/home/medicalrobotics/MASS_EXO/core/dart/dart.hpp
 
 /home/medicalrobotics/MASS_EXO/core/Muscle.h
 dart/dart.hpp
