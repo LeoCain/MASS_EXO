@@ -54,9 +54,9 @@ Initialize(const std::string& meta_file,bool load_obj)
 			std::string str2;
 			ss>>str2;
 			if(!str2.compare("true"))
-				this->SetUseMuscle(true);
+				this->SetUseMuscle(true);	// sets mUseMuscle to true
 			else
-				this->SetUseMuscle(false);
+				this->SetUseMuscle(false);	// sets mUseMuscle to false
 		}
 		else if(!index.compare("con_hz")){
 			int hz;
@@ -188,10 +188,10 @@ void
 Environment::
 Step()
 {	
-	if(mUseMuscle)
+	if(mUseMuscle)	// it seems that the program will always enter this condititon, if use_muscle is set true in metadata.txt
 	{
 		int count = 0;
-		for(auto muscle : mCharacter->GetMuscles())
+		for(auto muscle : mCharacter->GetMuscles())	// Iterate through each muscle
 		{
 			muscle->activation = mActivationLevels[count++];
 			muscle->Update();
@@ -204,8 +204,8 @@ Step()
 
 			int n = skel->getNumDofs();
 			int m = muscles.size();
-			Eigen::MatrixXd JtA = Eigen::MatrixXd::Zero(n,m);
-			Eigen::VectorXd Jtp = Eigen::VectorXd::Zero(n);
+			Eigen::MatrixXd JtA = Eigen::MatrixXd::Zero(n,m);	//torque due to active muscle force?
+			Eigen::VectorXd Jtp = Eigen::VectorXd::Zero(n);		//torque due to passive muscle force?
 
 			for(int i=0;i<muscles.size();i++)
 			{
@@ -253,9 +253,10 @@ Eigen::VectorXd
 Environment::
 GetDesiredTorques()
 {
-	Eigen::VectorXd p_des = mTargetPositions;
+	Eigen::VectorXd p_des = mTargetPositions;			// Retrieve target positions of joints? DOFs?
 	p_des.tail(mTargetPositions.rows()-mRootJointDof) += mAction;
-	mDesiredTorque = mCharacter->GetSPDForces(p_des);
+	mDesiredTorque = mCharacter->GetSPDForces(p_des);	// So messing with tau in GetSPDForces changes the desired torque for the muscles to acquire
+														// not really what we wanted
 	return mDesiredTorque.tail(mDesiredTorque.rows()-mRootJointDof);
 }
 Eigen::VectorXd
@@ -273,6 +274,8 @@ GetMuscleTorques()
 	}
 	
 	return mCurrentMuscleTuple.JtA;
+
+
 }
 double exp_of_squared(const Eigen::VectorXd& vec,double w)
 {

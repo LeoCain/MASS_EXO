@@ -178,7 +178,7 @@ ApplyForceToBody()
 		Eigen::Vector3d dir = mCachedAnchorPositions[i+1]-mCachedAnchorPositions[i];
 		dir.normalize();
 		dir = f*dir;
-		mAnchors[i]->bodynodes[0]->addExtForce(dir,mCachedAnchorPositions[i],false,false);
+		mAnchors[i]->bodynodes[0]->addExtForce(dir,mCachedAnchorPositions[i],false,false);	// 
 	}
 
 	for(int i =1;i<mAnchors.size();i++)
@@ -235,7 +235,7 @@ GetRelatedJtA()
 	
 	Eigen::VectorXd A = GetForceJacobianAndPassive().first;
 
-	Eigen::VectorXd JtA = Jt*A;
+	Eigen::VectorXd JtA = Jt*A;	// end effector twist?
 	
 	Eigen::VectorXd JtA_reduced = Eigen::VectorXd::Zero(num_related_dofs);
 	for(int i =0;i<num_related_dofs;i++){

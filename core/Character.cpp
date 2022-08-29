@@ -139,7 +139,7 @@ SetPDParameters(double kp, double kv)
 /**
  * @brief: Potentially the function to modify with augmented exo torque?
  * 
- * @param p_desired: desired position maybe?
+ * @param p_desired: desired positions of joints? of DOFs?
  * @return: Eigen::VectorXd which describes the joint torques (maybe?)
  */
 Eigen::VectorXd
