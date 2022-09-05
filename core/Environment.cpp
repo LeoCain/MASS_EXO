@@ -197,6 +197,23 @@ Step()
 			muscle->Update();
 			muscle->ApplyForceToBody();
 		}
+		// TODO1: Verify that setForces does set TORQUE when called on joints (XS)
+		// TODO2: Write python code to verify that these forces can be set from inside python (XS)
+		mCharacter->GetSkeleton()->getBodyNode("FemurL")->getParentJoint()->setForces(GetLHipT()); // does this apply a force or torque?
+		mCharacter->GetSkeleton()->getBodyNode("FemurR")->getParentJoint()->setForces(GetRHipT()); 
+		mCharacter->GetSkeleton()->getBodyNode("TibiaL")->getParentJoint()->setForces(GetLKneeT());
+		mCharacter->GetSkeleton()->getBodyNode("TibiaR")->getParentJoint()->setForces(GetRKneeT());
+
+		// double test_f = 20.0;
+		// use addExtForce() or addExtTorque
+
+		// vec.normalize();
+		// vec = test_f*vec;
+		// Eigen::Vector3d anchor{0, 0, 0};
+		// mCharacter->GetMuscles()[mCharacter->GetMuscles().size() - 1]->mAnchors[1]->bodynodes[0]->addExtForce(vec,anchor,false,false);
+		// mCharacter->GetSkeleton()->getBodyNode("FemurR")->addExtTorque(vec);
+		// mCharacter->GetMuscles()[mCharacter->GetMuscles().size() - 2]->mAnchors[0]->bodynodes[0]->addExtForce(vec,anchor,false,false);
+
 		if(mSimCount == mRandomSampleIndex)
 		{
 			auto& skel = mCharacter->GetSkeleton();
@@ -426,5 +443,8 @@ GetReward()
 
 	double r = r_ee*(w_q*r_q + w_v*r_v);			// Why is r_com computed, but not used -> accounted for indirectly by r_ee? 
 													// even so, why would you compute it then?
+
+													// Looked back at commit history of MASS and found r_com being used 
+													// They just did not remove it here - Z
 	return r;
 }

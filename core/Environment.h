@@ -56,6 +56,54 @@ public:
 	const Eigen::VectorXd& GetAverageActivationLevels(){return mAverageActivationLevels;}
 	void SetActivationLevels(const Eigen::VectorXd& a){mActivationLevels = a;}
 	bool GetUseMuscle(){return mUseMuscle;}
+
+	// Added by XS:
+	// Setters and getters for the hip/knee joint torque vectors:
+	/**
+	 * @return Eigen::Vector3d representation of Left Hip Torque
+	 */
+	Eigen::Vector3d GetLHipT(){return T_Hip_L;}	
+
+	/**
+	 * @return Eigen::Vector3d representation of Right Hip Torque
+	 */		
+	Eigen::Vector3d GetRHipT(){return T_Hip_R;}
+
+	/**
+	 * @return Eigen::VectorXd representation of Left Knee Torque
+	 */
+	Eigen::VectorXd GetLKneeT(){return T_Knee_L;}	
+
+	/**
+	 * @return Eigen::VectorXd representation of Right Knee Torque
+	 */
+	Eigen::VectorXd GetRKneeT(){return T_Knee_R;}
+
+	/**
+	 * @brief Sets a new value for the left hip torque vector
+	 * @param vec Eigen::Vector3d& representation of the new T vector
+	 */
+	void SetLHipT(Eigen::Vector3d& vec){T_Hip_L = vec;}
+
+	/**
+	 * @brief Sets a new value for the right hip torque vector
+	 * @param vec Eigen::Vector3d& representation of the new T vector
+	 */
+	void SetRHipT(Eigen::Vector3d& vec){T_Hip_R = vec;}
+
+	/**
+	 * @brief Sets a new value for the left knee torque vector
+	 * @param vec Eigen::VectorXd& representation of the new T vector
+	 */
+	void SetLKneeT(Eigen::VectorXd& vec){T_Knee_L = vec;}
+
+	/**
+	 * @brief Sets a new value for the right knee torque vector
+	 * @param vec Eigen::VectorXd& representation of the new T vector
+	 */
+	void SetRKneeT(Eigen::VectorXd& vec){T_Knee_R = vec;}
+
+
 private:
 	dart::simulation::WorldPtr mWorld;
 	int mControlHz,mSimulationHz;
@@ -78,6 +126,15 @@ private:
 	int mRandomSampleIndex;
 
 	double w_q,w_v,w_ee,w_com;
+
+	// Added by XS:
+	// Variables added to represent exo torques to be applied to knee/hip joints
+	Eigen::Vector3d T_Hip_L{0, 0, 0};						// Left hip
+	Eigen::Vector3d T_Hip_R{0, 0, 0};						// Right hip
+	// Knee torque is 1D vector as it is revolute 
+	Eigen::VectorXd T_Knee_L = Eigen::VectorXd::Zero(1);	// Left knee
+	Eigen::VectorXd T_Knee_R = Eigen::VectorXd::Zero(1);	// Right knee
+
 };
 };
 

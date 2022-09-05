@@ -58,10 +58,10 @@ LoadMuscles(const std::string& path)
 	for(TiXmlElement* unit = muscledoc->FirstChildElement("Unit");unit!=nullptr;unit = unit->NextSiblingElement("Unit"))
 	{
 		std::string name = unit->Attribute("name");
-		double f0 = std::stod(unit->Attribute("f0"));
-		double lm = std::stod(unit->Attribute("lm"));
-		double lt = std::stod(unit->Attribute("lt"));
-		double pa = std::stod(unit->Attribute("pen_angle"));
+		double f0 = std::stod(unit->Attribute("f0")); // optimal muscle force? Z
+		double lm = std::stod(unit->Attribute("lm")); // muscle fibre length
+		double lt = std::stod(unit->Attribute("lt")); // normalised tendon length
+		double pa = std::stod(unit->Attribute("pen_angle")); // pennation angle
 		double lmax = std::stod(unit->Attribute("lmax"));
 		mMuscles.push_back(new Muscle(name,f0,lm,lt,pa,lmax));
 		int num_waypoints = 0;
@@ -159,10 +159,10 @@ GetSPDForces(const Eigen::VectorXd& p_desired)
 	Eigen::VectorXd v_diff = -mKv.cwiseProduct(dq);
 	Eigen::VectorXd ddq = M_inv*(-mSkeleton->getCoriolisAndGravityForces()+p_diff+v_diff+mSkeleton->getConstraintForces());	// a = F/M or ddtheta = T/I?
 
-	Eigen::VectorXd mod = Eigen::VectorXd::Zero(p_diff.size()); // size is 56 = number of DOFs??
-	// std::cout << "*=====================" << p_diff.size() << "=========================*";
-	mod << 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000;
-	Eigen::VectorXd tau = p_diff + v_diff + mod - dt*mKv.cwiseProduct(ddq);
+	// Eigen::VectorXd mod = Eigen::VectorXd::Zero(p_diff.size()); // size is 56 = number of DOFs??
+	// // std::cout << "*=====================" << p_diff.size() << "=========================*";
+	// mod << 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000;
+	Eigen::VectorXd tau = p_diff + v_diff - dt*mKv.cwiseProduct(ddq);
 	// Eigen::VectorXd tau = mod;
 
 	tau.head<6>().setZero();

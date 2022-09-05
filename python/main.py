@@ -17,7 +17,7 @@ import torch.nn.functional as F
 import torchvision.transforms as T
 
 import numpy as np
-import pymss
+import pymss	# A compiled file of all the C++ function
 from Model import *
 
 # Set tensors based on whether GPU with cuda is available
@@ -66,7 +66,7 @@ class PPO(object):
 	def __init__(self,meta_file):
 		np.random.seed(seed = int(time.time()))
 		self.num_slaves = 16
-		self.env = pymss.pymss(meta_file,self.num_slaves)
+		self.env = pymss.pymss(meta_file,self.num_slaves)	# C++ functionality accessed via self.env
 		self.use_muscle = self.env.UseMuscle()
 		self.num_state = self.env.GetNumState()
 		self.num_action = self.env.GetNumAction()

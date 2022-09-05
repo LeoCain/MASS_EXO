@@ -29,6 +29,29 @@ GetPoint()
 	return p;
 }
 
+/**
+ * 
+ * f0: optimal force ? Z
+ * l_m0: optimal muscle fibre length
+ * l_m: muscle fibre length
+ * l_t0: optimal tendon slack length
+ * l_mt0: optimal musculo-tendon length ? Z
+ * l_mt: musculo-tendon length
+ * activation: 0 to 1 normalised muscle activation
+ * f_toe: normalised tendon forces above this value transition from toe region to linear region
+ * k_toe: exponential shape factor
+ * k_lin: linear scale factor
+ * e_toe: tendon strain which the tendon exhibits linear behaviour
+ * e_t0: optimal tendon length? normalised? Z
+ * 
+ * k_pe and e_mo are shape parameters that modulate passive force curves
+ * k_pe: shape factor
+ * e_mo: passive muscle strain due to maximum isometric force
+ * 
+ * gamma: force-length relationship of individual sarcomeres
+ * l_mt_max: maximum musculo-tendon length? Z
+ * 
+ */
 Muscle::
 Muscle(std::string _name,double _f0,double _lm0,double _lt0,double _pen_angle,double lmax)
 	:name(_name),f0(_f0),l_m0(_lm0),l_m(l_mt - l_t0),l_t0(_lt0),l_mt0(0.0),l_mt(1.0),activation(0.0),f_toe(0.33),k_toe(3.0),k_lin(51.878788),e_toe(0.02),e_t0(0.033),k_pe(4.0),e_mo(0.6),gamma(0.5),l_mt_max(lmax)
@@ -173,15 +196,15 @@ ApplyForceToBody()
 {
 	double f = GetForce();
 
-	for(int i =0;i<mAnchors.size()-1;i++)
+	for(int i=0;i<mAnchors.size()-1;i++)
 	{
 		Eigen::Vector3d dir = mCachedAnchorPositions[i+1]-mCachedAnchorPositions[i];
 		dir.normalize();
 		dir = f*dir;
-		mAnchors[i]->bodynodes[0]->addExtForce(dir,mCachedAnchorPositions[i],false,false);	// 
+		mAnchors[i]->bodynodes[0]->addExtForce(dir,mCachedAnchorPositions[i],false,false); 
 	}
 
-	for(int i =1;i<mAnchors.size();i++)
+	for(int i=1;i<mAnchors.size();i++)
 	{
 		Eigen::Vector3d dir = mCachedAnchorPositions[i-1]-mCachedAnchorPositions[i];
 		dir.normalize();
