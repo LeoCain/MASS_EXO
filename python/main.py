@@ -216,7 +216,7 @@ class PPO(object):
 				
 				elif self.env.IsEndOfEpisode(j) is False:
 					terminated_state = False
-					rewards[j] = self.env.GetReward(j)
+					rewards[j]= self.env.GetReward(j)
 					self.episodes[j].Push(states[j], actions[j], rewards[j], values[j], logprobs[j])
 					local_step += 1
 
@@ -397,6 +397,7 @@ def Plot(y,title,num_fig=1,ylim=True):
 		plt.ylim([0,1])
 	plt.pause(0.001)
 	plt.savefig('../png/Reward_Graph.png')
+	# plt.close()
 
 import argparse
 import os

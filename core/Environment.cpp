@@ -270,10 +270,11 @@ Eigen::VectorXd
 Environment::
 GetDesiredTorques()
 {
-	Eigen::VectorXd p_des = mTargetPositions;			// Retrieve target positions of joints? DOFs?
-	p_des.tail(mTargetPositions.rows()-mRootJointDof) += mAction;
-	mDesiredTorque = mCharacter->GetSPDForces(p_des);	// So messing with tau in GetSPDForces changes the desired torque for the muscles to acquire
-														// not really what we wanted
+	Eigen::VectorXd p_des = mTargetPositions;						// Retrieve target positions of joints? DOFs?
+	p_des.tail(mTargetPositions.rows()-mRootJointDof) += mAction;	// updates desired position using the action (change in pos?), chosen by simNN ?? - XS
+																	// mrootjointdof p_des is not modified as it represents the position of the whole skeleton?? - XS
+	mDesiredTorque = mCharacter->GetSPDForces(p_des);				// So messing with tau in GetSPDForces changes the desired torque for the muscles to acquire
+																	// not really what we wanted
 	return mDesiredTorque.tail(mDesiredTorque.rows()-mRootJointDof);
 }
 Eigen::VectorXd
@@ -380,7 +381,7 @@ SetAction(const Eigen::VectorXd& a)
  * 
  * @return double representation of the reward.
  */
-double 
+double
 Environment::
 GetReward()
 {
@@ -441,10 +442,26 @@ GetReward()
 	double r_ee = exp_of_squared(ee_diff,40.0);	
 	double r_com = exp_of_squared(com_diff,10.0);
 
+	double r_T = exp_of_squared(GetLHipT(), 10.0) + exp_of_squared(GetRHipT(), 10.0) + exp_of_squared(GetLKneeT(), 10.0) + exp_of_squared(GetRKneeT(), 10.0);
+
 	double r = r_ee*(w_q*r_q + w_v*r_v);			// Why is r_com computed, but not used -> accounted for indirectly by r_ee? 
-													// even so, why would you compute it then?
+													// even so, why would you compute it then? -XS
 
 													// Looked back at commit history of MASS and found r_com being used 
-													// They just did not remove it here - Z
+													// They just did not remove it here - ZB
+	double rT = r_ee*(w_q*r_q + w_v*r_v) - r_T;
+
 	return r;
+}
+
+/**
+ * @brief 
+ * 
+ * @return double representation of a modified reward for the exo joints
+ */
+double Environment::GetTReward() {
+	double r_T = exp_of_squared(GetLHipT(), 10.0) + exp_of_squared(GetRHipT(), 10.0) + exp_of_squared(GetLKneeT(), 10.0) + exp_of_squared(GetRKneeT(), 10.0);
+	double rT = GetReward() - r_T;
+
+	return rT;
 }

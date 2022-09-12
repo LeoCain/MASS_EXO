@@ -81,6 +81,7 @@ double
 EnvManager::
 GetReward(int id)
 {
+	
 	return mEnvs[id]->GetReward();
 }
 
@@ -185,7 +186,7 @@ EnvManager::
 SetActivationLevels(const Eigen::MatrixXd& activations)
 {
 	for (int id = 0; id < mNumEnvs; ++id)
-		mEnvs[id]->SetActivationLevels(activations.row(id));
+		mEnvs[id]->SetActivationLevels(activations.row(id));	// why are there multiple envs
 }
 
 void

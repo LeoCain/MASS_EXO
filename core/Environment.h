@@ -37,6 +37,7 @@ public:
 	Eigen::VectorXd GetState();
 	void SetAction(const Eigen::VectorXd& a);
 	double GetReward();
+	double GetTReward();
 
 	Eigen::VectorXd GetDesiredTorques();
 	Eigen::VectorXd GetMuscleTorques();
@@ -115,7 +116,7 @@ private:
 
 	int mNumState;
 	int mNumActiveDof;
-	int mRootJointDof;
+	int mRootJointDof;	// The number of DOFs of the joint with no parent in the skeleton - the "first" joint? - XS
 
 	Eigen::VectorXd mActivationLevels;
 	Eigen::VectorXd mAverageActivationLevels;

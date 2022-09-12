@@ -1,3 +1,8 @@
+
+/**
+ * This file seems to handle loading and application of the trained neural nets, by executing python code from C++
+ */
+\
 #include "Window.h"
 #include "Environment.h"
 #include "Character.h"
@@ -48,9 +53,9 @@ Window(Environment* env,const std::string& nn_path)
 	str = ("num_action = "+std::to_string(mEnv->GetNumAction())).c_str();
 	py::exec(str,mns);
 
-	nn_module = py::eval("SimulationNN(num_state,num_action)",mns);
+	nn_module = py::eval("SimulationNN(num_state,num_action)",mns);	// Create the simulation net
 
-	py::object load = nn_module.attr("load");
+	py::object load = nn_module.attr("load");						// Load the trained weights to the sim net
 	load(nn_path);
 }
 Window::
@@ -66,9 +71,9 @@ Window(Environment* env,const std::string& nn_path,const std::string& muscle_nn_
 	str = ("num_muscles = "+std::to_string(mEnv->GetCharacter()->GetMuscles().size())).c_str();
 	py::exec(str,mns);
 
-	muscle_nn_module = py::eval("MuscleNN(num_total_muscle_related_dofs,num_actions,num_muscles)",mns);
+	muscle_nn_module = py::eval("MuscleNN(num_total_muscle_related_dofs,num_actions,num_muscles)",mns);	// Create the muscle net
 
-	py::object load = muscle_nn_module.attr("load");
+	py::object load = muscle_nn_module.attr("load");													// Load trained weights to muscle net
 	load(muscle_nn_path);
 }
 void
@@ -100,17 +105,25 @@ draw()
 	// mTrackBall.setQuaternion(q);
 	SetFocusing();
 }
+
+/**
+ * @brief function fro handling keyboard commands while in the rendered environment - XS
+ * 
+ * @param _key The key press variable
+ * @param _x 
+ * @param _y 
+ */
 void
 Window::
 keyboard(unsigned char _key, int _x, int _y)
 {
 	switch (_key)
 	{
-	case 's': this->Step();break;
-	case 'f': mFocus = !mFocus;break;
-	case 'r': this->Reset();break;
-	case ' ': mSimulating = !mSimulating;break;
-	case 'o': mDrawOBJ = !mDrawOBJ;break;
+	case 's': this->Step();break;				// Move forward one simulation step (?)
+	case 'f': mFocus = !mFocus;break;			// Follow simulation with window
+	case 'r': this->Reset();break;				// Reset sim to the start
+	case ' ': mSimulating = !mSimulating;break;	// Play the simulation
+	case 'o': mDrawOBJ = !mDrawOBJ;break;		// Switch between simple and complex skeleton model
 	case 27 : exit(0);break;
 	default:
 		Win3D::keyboard(_key,_x,_y);break;
@@ -126,6 +139,11 @@ displayTimer(int _val)
 	glutPostRedisplay();
 	glutTimerFunc(mDisplayTimeout, refreshTimer, _val);
 }
+
+/**
+ * @brief Function which handles stepping through the rendering of the simulation,
+ * by selecting an action, using this to set activations, then calling the Env step function - XS
+ */
 void
 Window::
 Step()
@@ -133,16 +151,16 @@ Step()
 	int num = mEnv->GetSimulationHz()/mEnv->GetControlHz();
 	Eigen::VectorXd action;
 	if(mNNLoaded)
-		action = GetActionFromNN();
+		action = GetActionFromNN();		// Some vector from which muscle torques can be calculated?
 	else
 		action = Eigen::VectorXd::Zero(mEnv->GetNumAction());
-	mEnv->SetAction(action);
+	mEnv->SetAction(action);			// Action sent to environment
 
 	if(mEnv->GetUseMuscle())
 	{
 		int inference_per_sim = 2;
 		for(int i=0;i<num;i+=inference_per_sim){
-			Eigen::VectorXd mt = mEnv->GetMuscleTorques();
+			Eigen::VectorXd mt = mEnv->GetMuscleTorques();		// Muscle torques can be f
 			mEnv->SetActivationLevels(GetActivationFromNN(mt));
 			for(int j=0;j<inference_per_sim;j++)
 				mEnv->Step();
@@ -176,14 +194,25 @@ SetFocusing()
 }
 
 
-
+/**
+ * @brief Retrieve the optimal action from the sim NN by passing the current state to it - XS
+ * 
+ * @return Eigen::VectorXd representation of the action (some form of target from which target muscle torques can be calculated??) 
+ */
 Eigen::VectorXd
 Window::
 GetActionFromNN()
 {
+	// Calls get_action function from the simulationNN python class
 	return nn_module.attr("get_action")(mEnv->GetState()).cast<Eigen::VectorXd>();
 }
 
+/**
+ * @brief Get an array of all muscle activations from the muscle net.
+ * 
+ * @param mt 
+ * @return Eigen::VectorXd 
+ */
 Eigen::VectorXd
 Window::
 GetActivationFromNN(const Eigen::VectorXd& mt)
