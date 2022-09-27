@@ -1,4 +1,3 @@
-
 /**
  * This file seems to handle loading and application of the trained neural nets, by executing python code from C++
  */
@@ -160,7 +159,7 @@ Step()
 	{
 		int inference_per_sim = 2;
 		for(int i=0;i<num;i+=inference_per_sim){
-			Eigen::VectorXd mt = mEnv->GetMuscleTorques();		// Muscle torques can be f
+			Eigen::VectorXd mt = mEnv->GetMuscleTorques();		// Muscle torques can be ??
 			mEnv->SetActivationLevels(GetActivationFromNN(mt));
 			for(int j=0;j<inference_per_sim;j++)
 				mEnv->Step();
@@ -171,7 +170,7 @@ Step()
 		for(int i=0;i<num;i++)
 			mEnv->Step();	
 	}
-	
+	std::cout << "step reward:" << mEnv->GetReward() << "state:" << mEnv->GetState() << '\n';
 }
 void
 Window::

@@ -6,6 +6,7 @@
 #include <pybind11/eigen.h>
 #include <pybind11/numpy.h>
 #include <pybind11/embed.h>
+#include <pybind11/stl.h>
 namespace py = pybind11;
 
 namespace MASS
@@ -22,7 +23,7 @@ public:
 	void draw() override;
 	void keyboard(unsigned char _key, int _x, int _y) override;
 	void displayTimer(int _val) override;
-private:
+public:
 	void SetFocusing();
 
 	void DrawEntity(const dart::dynamics::Entity* entity);
@@ -35,7 +36,7 @@ private:
 	void DrawShadow(const Eigen::Vector3d& scale, const aiScene* mesh,double y);
 	void DrawAiMesh(const struct aiScene *sc, const struct aiNode* nd,const Eigen::Affine3d& M,double y);
 	void DrawGround(double y);
-	void Step();
+	virtual void Step();
 	void Reset();
 
 	Eigen::VectorXd GetActionFromNN();

@@ -1,6 +1,9 @@
 #ifndef __ENV_MANAGER_H__
 #define __ENV_MANAGER_H__
+#include "dart/dart.hpp"
+#include "dart/gui/gui.hpp"
 #include "Environment.h"
+#include "Window.h"
 #include <pybind11/embed.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
@@ -22,7 +25,11 @@ public:
 	int GetNumSteps();
 	bool UseMuscle();
 
+	// void MakeWindow(std::string, std::string);
+	// void DrawWindow();
+
 	void Step(int id);
+	// void BenStep();
 	void Reset(bool RSI,int id);
 	bool IsEndOfEpisode(int id);
 	double GetReward(int id);
@@ -47,10 +54,18 @@ public:
 	const Eigen::MatrixXd& GetMuscleTuplesTauDes();
 	const Eigen::MatrixXd& GetMuscleTuplesL();
 	const Eigen::MatrixXd& GetMuscleTuplesb();
+
+	// sets the exo torques using MASS::Environment functions
+	void SetLHipTs(float T);
+	void SetRHipTs(float T);
+	void SetLKneeTs(float T);
+	void SetRKneeTs(float T);
 private:
 	std::vector<MASS::Environment*> mEnvs;
+	// MASS::Window* mWindow;
 
 	int mNumEnvs;
+	// std::string mMetafile;
 	int muscle_torque_cols;
 	int tau_des_cols;
 

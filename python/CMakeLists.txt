@@ -15,20 +15,27 @@ if(OPENMP_FOUND)
 endif()
 
 find_package(DART REQUIRED COMPONENTS collision-bullet CONFIG)
+find_package(OpenGL REQUIRED)
+find_package(GLUT REQUIRED)
+
 find_package(PythonLibs REQUIRED)
 find_package(pybind11 REQUIRED)
 
 link_directories(../core/)
 include_directories(../core/)
+link_directories(../render/)
+include_directories(../render/)
 
 file(GLOB srcs "*.h" "*.cpp")
+
+include_directories(${OPENGL_INCLUDE_DIR})
+include_directories(${GLUT_INCLUDE_DIR})
 
 include_directories(${PYTHON_INCLUDE_DIR})
 include_directories(${DART_INCLUDE_DIRS})
 
 add_library(pymss SHARED ${srcs})
-
-target_link_libraries(pymss ${DART_LIBRARIES} ${PYTHON_LIBRARIES} mss pybind11::module)
+target_link_libraries(pymss ${DART_LIBRARIES} ${PYTHON_LIBRARIES} GL GLU glut mss pybind11::module pybind11::embed)
 set_target_properties(pymss PROPERTIES PREFIX "" )
 
 add_executable(display_model ../data/load_model.cpp)

@@ -1,0 +1,34 @@
+1. optimise exo_agent (currently makes the gait worse).
+    a) reward function
+    b) optimiser (try adam/different learning rates)
+    c) number of epochs
+    d) neural net architechture
+    e) adjust frequency of torque application?
+    f) change c++ step to call python step?
+    g) multiple workers?
+2. Train benjaSIM with f0 parameter set to 0, to see the effect.
+3. Train benjaSIM with only r_ee and r_v/only r_ee/r_ee - net activation energy used.
+3. record different muscle group activations
+    a) knee flexion muscle group
+    b) knee extensor muscle group
+    c) hip flexion muscle group
+    d) hip extensor muscle group
+4. record torque applied at each joint
+    a) Left hip
+    b) Left knee
+    c) Right hip
+    d) Right knee
+5. record joint angles
+    a) Left hip
+    b) Left knee
+    c) Right hip
+    d) Right knee
+6. record reward during training
+    a) lower bound
+    b) upper bound
+    c) mean
+7. live graph recorded values
+    a) muscle group activations 
+    b) applied torques
+    c) joint angles
+    d) reward with bounds

@@ -27,7 +27,8 @@ Environment::
 Initialize(const std::string& meta_file,bool load_obj)
 {
 	std::ifstream ifs(meta_file);	// Input stream class is created so meta_file can be read/operated on
-	if(!(ifs.is_open()))	// Self-exlanatory
+	
+	if(!(ifs.is_open()))			// Self-exlanatory - triggered if ifstream object cannot open file
 	{
 		std::cout<<"Can't read file "<<meta_file<<std::endl;
 		return;
@@ -160,16 +161,23 @@ Initialize()
 void
 Environment::
 Reset(bool RSI)
-{
-	mWorld->reset();
+{	
+	mWorld->reset();	// reset DART simulation
+	
+	// Reset all exo torques to 0:
+	SetLHipT(0);
+	SetRHipT(0);
+	SetLKneeT(0);
+	SetRKneeT(0);
 
+	// reset all forces and constraints
 	mCharacter->GetSkeleton()->clearConstraintImpulses();
 	mCharacter->GetSkeleton()->clearInternalForces();
 	mCharacter->GetSkeleton()->clearExternalForces();
 	
-	double t = 0.0;
+	double t = 0.0;	// Set time to 0
 
-	if(RSI)
+	if(RSI)	// sets time randomly between 0 and 0.9*max time, not sure of the purpose
 		t = dart::math::random(0.0,mCharacter->GetBVH()->GetMaxTime()*0.9);
 	mWorld->setTime(t); 
 	mCharacter->Reset();
@@ -199,10 +207,16 @@ Step()
 		}
 		// TODO1: Verify that setForces does set TORQUE when called on joints (XS)
 		// TODO2: Write python code to verify that these forces can be set from inside python (XS)
-		mCharacter->GetSkeleton()->getBodyNode("FemurL")->getParentJoint()->setForces(GetLHipT()); // does this apply a force or torque?
-		mCharacter->GetSkeleton()->getBodyNode("FemurR")->getParentJoint()->setForces(GetRHipT()); 
-		mCharacter->GetSkeleton()->getBodyNode("TibiaL")->getParentJoint()->setForces(GetLKneeT());
-		mCharacter->GetSkeleton()->getBodyNode("TibiaR")->getParentJoint()->setForces(GetRKneeT());
+		Eigen::Vector3d T_LHip{GetLHipT(), 0, 0};
+		Eigen::Vector3d T_RHip{GetRHipT(), 0, 0};
+		Eigen::VectorXd T_RKnee = Eigen::VectorXd::Zero(1);
+		T_RKnee << GetLKneeT();
+		Eigen::VectorXd T_LKnee = Eigen::VectorXd::Zero(1);
+		T_LKnee << GetRKneeT();
+		mCharacter->GetSkeleton()->getBodyNode("FemurL")->getParentJoint()->setForces(T_LHip); // does this apply a force or torque?
+		mCharacter->GetSkeleton()->getBodyNode("FemurR")->getParentJoint()->setForces(T_RHip); 
+		mCharacter->GetSkeleton()->getBodyNode("TibiaL")->getParentJoint()->setForces(T_LKnee);
+		mCharacter->GetSkeleton()->getBodyNode("TibiaR")->getParentJoint()->setForces(T_RKnee);
 
 		// double test_f = 20.0;
 		// use addExtForce() or addExtTorque
@@ -328,35 +342,49 @@ IsEndOfEpisode()
 	
 	return isTerminal;
 }
+
+/**
+ * @brief Get the State. Note that "body nodes" are links (?) - XS
+ * 
+ * @return Eigen::VectorXd representation of the state, which is:
+ * (position of each link COM, velocity of each link COM (last item is pelvis (root node) velocity), how far through gait cycle)
+ */
 Eigen::VectorXd 
 Environment::
 GetState()
 {
-	auto& skel = mCharacter->GetSkeleton();
-	dart::dynamics::BodyNode* root = skel->getBodyNode(0);
-	int num_body_nodes = skel->getNumBodyNodes();
-	Eigen::VectorXd p,v;
+	auto& skel = mCharacter->GetSkeleton();					// Retrieve the simulation object
+	dart::dynamics::BodyNode* root = skel->getBodyNode(0);	// Retrieve the root body node (the pelvis?)
+	int num_body_nodes = skel->getNumBodyNodes();			// Compute total number of links
 
-	p.resize( (num_body_nodes-1)*3);
+	// Initialise and configure link position and velocity vectors - 3 dim vector to describe each pos and vel
+	Eigen::VectorXd p,v;			// p - "3D position of bones", v - "linear velocity of bones", phi - "[0, 1], phase variable"
+	p.resize((num_body_nodes-1)*3);
 	v.resize((num_body_nodes)*3);
 
-	for(int i = 1;i<num_body_nodes;i++)
+	// Populate the pos and vel vectors
+	for(int i = 1;i<num_body_nodes;i++)	// i starts at 1, to skip the root node (pelvis)
 	{
-		p.segment<3>(3*(i-1)) = skel->getBodyNode(i)->getCOM(root);
-		v.segment<3>(3*(i-1)) = skel->getBodyNode(i)->getCOMLinearVelocity();
+		p.segment<3>(3*(i-1)) = skel->getBodyNode(i)->getCOM(root);				// Get the pos of indexed link COM relative to pelvis
+		v.segment<3>(3*(i-1)) = skel->getBodyNode(i)->getCOMLinearVelocity();	// Get the vel of indexed link COM expressed in arbitrary frames?? not sure what this means
 	}
 	
-	v.tail<3>() = root->getCOMLinearVelocity();
+	// Position of pelvis is not recorded in state, but velocity of it is added into vel vector here
+	v.tail<3>() = root->getCOMLinearVelocity();	
 
 	double t_phase = mCharacter->GetBVH()->GetMaxTime();
-	double phi = std::fmod(mWorld->getTime(),t_phase)/t_phase;
+	double phi = std::fmod(mWorld->getTime(),t_phase)/t_phase;	// fraction of how far through the gait cycle the sim is 
+																// modulus is used, so that when one full cycle is up, this progress value
+																// wraps around to 0
 
-	p *= 0.8;
+	// scaled to match BVH reference movement??
+	p *= 0.8;	
 	v *= 0.2;
 
-	Eigen::VectorXd state(p.rows()+v.rows()+1);
-
+	// Concatenate pos, vel, and gait cycle progress into one state vector
+	Eigen::VectorXd state(p.rows()+v.rows()+1);	
 	state<<p,v,phi;
+
 	return state;
 }
 void 
@@ -370,10 +398,20 @@ SetAction(const Eigen::VectorXd& a)
 	std::pair<Eigen::VectorXd,Eigen::VectorXd> pv = mCharacter->GetTargetPosAndVel(t,1.0/mControlHz);
 	mTargetPositions = pv.first;
 	mTargetVelocities = pv.second;
-
+	// std::cout << mTargetPositions;
 	mSimCount = 0;
 	mRandomSampleIndex = rand()%(mSimulationHz/mControlHz);
 	mAverageActivationLevels.setZero();
+}
+
+void 
+Environment::
+SetExoTorques(Eigen::VectorXd Ts)
+{
+	SetLHipT(Ts[0]);
+	SetRHipT(Ts[1]);
+	SetLKneeT(Ts[2]);
+	SetRKneeT(Ts[3]);
 }
 
 /**
@@ -412,7 +450,8 @@ GetReward()
 	}
 
 	// ????
-	auto ees = mCharacter->GetEndEffectors();	// list of end effector objects/positions?
+	auto ees = mCharacter->GetEndEffectors();	// list of end effector objects/positions - Head, hands, and feet.
+	// std::cout << ees.size()
 	Eigen::VectorXd ee_diff(ees.size()*3);		// make a vector 3 times the size of end effector list, for recording end effector position difference in all 3 directions?
 	Eigen::VectorXd com_diff;					// initialise a vector for the difference between target and actual centre of mass?
 
@@ -442,19 +481,16 @@ GetReward()
 	double r_ee = exp_of_squared(ee_diff,40.0);	
 	double r_com = exp_of_squared(com_diff,10.0);
 
-	double r_T = exp_of_squared(GetLHipT(), 10.0) + exp_of_squared(GetRHipT(), 10.0) + exp_of_squared(GetLKneeT(), 10.0) + exp_of_squared(GetRKneeT(), 10.0);
-
 	double r = r_ee*(w_q*r_q + w_v*r_v);			// Why is r_com computed, but not used -> accounted for indirectly by r_ee? 
 													// even so, why would you compute it then? -XS
 
 													// Looked back at commit history of MASS and found r_com being used 
 													// They just did not remove it here - ZB
-	double rT = r_ee*(w_q*r_q + w_v*r_v) - r_T;
 
 	return r;
 }
 
-/**
+/**self.sim_env.GetStates()
  * @brief 
  * 
  * @return double representation of a modified reward for the exo joints

@@ -25,6 +25,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_HOME_DIRECTORY}/cmake")
 add_subdirectory( core )
 add_subdirectory( render )
 add_subdirectory( python )
+add_subdirectory( Exo_agent )
 
 add_executable(load_model data/load_model.cpp)
 target_link_libraries(load_model ${PYTHON_LIBRARIES} mss dart dart-collision-bullet dart-gui dart-utils dart-utils-urdf pybind11::module)

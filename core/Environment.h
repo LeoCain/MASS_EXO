@@ -63,47 +63,48 @@ public:
 	/**
 	 * @return Eigen::Vector3d representation of Left Hip Torque
 	 */
-	Eigen::Vector3d GetLHipT(){return T_Hip_L;}	
+	float GetLHipT(){return T_Hip_L;}	
 
 	/**
 	 * @return Eigen::Vector3d representation of Right Hip Torque
 	 */		
-	Eigen::Vector3d GetRHipT(){return T_Hip_R;}
+	float GetRHipT(){return T_Hip_R;}
 
 	/**
 	 * @return Eigen::VectorXd representation of Left Knee Torque
 	 */
-	Eigen::VectorXd GetLKneeT(){return T_Knee_L;}	
+	float GetLKneeT(){return T_Knee_L;}	
 
 	/**
 	 * @return Eigen::VectorXd representation of Right Knee Torque
 	 */
-	Eigen::VectorXd GetRKneeT(){return T_Knee_R;}
+	float GetRKneeT(){return T_Knee_R;}
 
 	/**
 	 * @brief Sets a new value for the left hip torque vector
 	 * @param vec Eigen::Vector3d& representation of the new T vector
 	 */
-	void SetLHipT(Eigen::Vector3d& vec){T_Hip_L = vec;}
+	void SetLHipT(float T){T_Hip_L = T;}
 
 	/**
 	 * @brief Sets a new value for the right hip torque vector
 	 * @param vec Eigen::Vector3d& representation of the new T vector
 	 */
-	void SetRHipT(Eigen::Vector3d& vec){T_Hip_R = vec;}
+	void SetRHipT(float T){T_Hip_R = T;}
 
 	/**
 	 * @brief Sets a new value for the left knee torque vector
 	 * @param vec Eigen::VectorXd& representation of the new T vector
 	 */
-	void SetLKneeT(Eigen::VectorXd& vec){T_Knee_L = vec;}
+	void SetLKneeT(float T){T_Knee_L = T;}
 
 	/**
 	 * @brief Sets a new value for the right knee torque vector
 	 * @param vec Eigen::VectorXd& representation of the new T vector
 	 */
-	void SetRKneeT(Eigen::VectorXd& vec){T_Knee_R = vec;}
+	void SetRKneeT(float T){T_Knee_R = T;}
 
+	void SetExoTorques(Eigen::VectorXd Ts);
 
 private:
 	dart::simulation::WorldPtr mWorld;
@@ -130,11 +131,12 @@ private:
 
 	// Added by XS:
 	// Variables added to represent exo torques to be applied to knee/hip joints
-	Eigen::Vector3d T_Hip_L{0, 0, 0};						// Left hip
-	Eigen::Vector3d T_Hip_R{0, 0, 0};						// Right hip
+	float T_Hip_L = 0;						// Left hip
+	float T_Hip_R = 0;						// Right hip
 	// Knee torque is 1D vector as it is revolute 
-	Eigen::VectorXd T_Knee_L = Eigen::VectorXd::Zero(1);	// Left knee
-	Eigen::VectorXd T_Knee_R = Eigen::VectorXd::Zero(1);	// Right knee
+	float T_Knee_L = 0;						// Left knee
+	float T_Knee_R = 0; 					// Right knee
+	// Eigen::VectorXd::Zero(1);	
 
 };
 };

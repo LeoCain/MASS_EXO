@@ -6,6 +6,7 @@ EnvManager::
 EnvManager(std::string meta_file,int num_envs)
 	:mNumEnvs(num_envs)
 {
+	// mMetafile = meta_file;
 	dart::math::seedRand();
 	omp_set_num_threads(mNumEnvs);
 	for(int i = 0;i<mNumEnvs;i++){
@@ -21,6 +22,8 @@ EnvManager(std::string meta_file,int num_envs)
 	mStates.resize(mNumEnvs, GetNumState());
 	mMuscleTorques.resize(mNumEnvs, muscle_torque_cols);
 	mDesiredTorques.resize(mNumEnvs, tau_des_cols);
+	
+	// win = new MASS::Window(mEnvs[0]);
 }
 int
 EnvManager::
@@ -64,6 +67,12 @@ Step(int id)
 {
 	mEnvs[id]->Step();
 }
+// void
+// EnvManager::
+// BenStep()
+// {
+// 	win->Step();
+// }
 void
 EnvManager::
 Reset(bool RSI,int id)
@@ -256,6 +265,81 @@ GetMuscleTuplesb()
 {
 	return mMuscleTuplesb;
 }
+
+// Added by XS
+/**
+ * @brief calls MASS::Environment function which sets a new value for the left hip torque vector
+ * @param vec Eigen::Vector3d& representation of the new T vector
+ */
+void 
+EnvManager::
+SetLHipTs(float T){
+#pragma omp parallel for				// Multithreading?
+	for (int id = 0;id<mNumEnvs;++id){
+		mEnvs[id]->SetLHipT(T);
+	}
+}
+
+/**
+ * @brief calls MASS::Environment function which sets a new value for the right hip torque vector
+ * @param vec Eigen::Vector3d& representation of the new T vector
+ */
+void 
+EnvManager::
+SetRHipTs(float T){
+#pragma omp parallel for				// Multithreading?
+	for (int id = 0;id<mNumEnvs;++id){
+		mEnvs[id]->SetRHipT(T);
+	}
+}
+
+/**
+ * @brief calls MASS::Environment function which sets a new value for the left knee torque vector
+ * @param vec Eigen::VectorXd& representation of the new T vector
+ */
+void 
+EnvManager::
+SetLKneeTs(float T){
+#pragma omp parallel for				// Multithreading?
+	for (int id = 0;id<mNumEnvs;++id){
+		mEnvs[id]->SetLKneeT(T);
+	}
+}
+
+/**
+ * @brief calls MASS::Environment function which sets a new value for the right knee torque vector
+ * @param vec Eigen::VectorXd& representation of the new T vector
+ */
+void 
+EnvManager::
+SetRKneeTs(float T){
+#pragma omp parallel for				// Multithreading?
+	for (int id = 0;id<mNumEnvs;++id){
+		mEnvs[id]->SetRKneeT(T);
+	}
+
+}
+
+// void 
+// EnvManager::
+// MakeWindow(std::string simNN_path, std::string muscleNN_path){
+// 	MASS::Environment* env;
+// 	env = new MASS::Environment();
+// 	env->Initialize(mMetafile, false);
+// 	mWindow = new MASS::Window(env, simNN_path, muscleNN_path);
+
+// 	// for(int i = 0;i<mNumEnvs;i++){
+// 	// 	mWindows.push_back(new MASS::Window(mEnvs[i], simNN_path, muscleNN_path));
+// 	// 	MASS::Window* win = mWindows.back();
+// 	// }
+// }
+
+// void
+// EnvManager::
+// DrawWindow(){
+// 	mWindow->draw();
+// }
+
 PYBIND11_MODULE(pymss, m)
 {
 	py::class_<EnvManager>(m, "pymss")
@@ -286,5 +370,11 @@ PYBIND11_MODULE(pymss, m)
 		.def("GetMuscleTuplesJtA",&EnvManager::GetMuscleTuplesJtA)
 		.def("GetMuscleTuplesTauDes",&EnvManager::GetMuscleTuplesTauDes)
 		.def("GetMuscleTuplesL",&EnvManager::GetMuscleTuplesL)
-		.def("GetMuscleTuplesb",&EnvManager::GetMuscleTuplesb);
+		.def("GetMuscleTuplesb",&EnvManager::GetMuscleTuplesb)
+		.def("SetLHipTs", &EnvManager::SetLHipTs)
+		.def("SetRHipTs", &EnvManager::SetRHipTs)
+		.def("SetLKneeTs", &EnvManager::SetLKneeTs)
+		.def("SetRKneeTs", &EnvManager::SetRKneeTs);
+		// .def("MakeWindow", &EnvManager::MakeWindow)
+		// .def("DrawWindow", &EnvManager::DrawWindow);
 }

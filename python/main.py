@@ -17,7 +17,7 @@ import torch.nn.functional as F
 import torchvision.transforms as T
 
 import numpy as np
-import pymss	# A compiled file of all the C++ function
+import pymss	# A compiled file of all the EnvManager file
 from Model import *
 
 # Set tensors based on whether GPU with cuda is available
@@ -65,8 +65,8 @@ class ReplayBuffer(object):
 class PPO(object):
 	def __init__(self,meta_file):
 		np.random.seed(seed = int(time.time()))
-		self.num_slaves = 16
-		self.env = pymss.pymss(meta_file,self.num_slaves)	# C++ functionality accessed via self.env
+		self.num_slaves = 16								# Number of threads to run (1 environment instance per thread?) - XS
+		self.env = pymss.pymss(meta_file,self.num_slaves)	# C++ functionality accessed via self.env, wh
 		self.use_muscle = self.env.UseMuscle()
 		self.num_state = self.env.GetNumState()
 		self.num_action = self.env.GetNumAction()
@@ -206,7 +206,7 @@ class PPO(object):
 					self.env.Steps(2)
 			else:
 				self.env.StepsAtOnce()
-
+			
 			for j in range(self.num_slaves):
 				nan_occur = False
 				terminated_state = True
