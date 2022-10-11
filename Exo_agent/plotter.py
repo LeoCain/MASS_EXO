@@ -225,6 +225,14 @@ class Plotter():
         :param ylabel: String representation of the ylabel
         :param plot_name: String, super title and/or filename
         """
+        # compute MAE for each joint angle
+        mae_list = []
+        i = 0
+        while i < len(y1_plot_lists):
+            mae_list.append(self.Compute_MAE(y1_plot_lists[i], y2_plot_lists[i]))
+            i += 1
+        avg_mae = np.mean(np.array(mae_list))
+
         # Clear exisiting plot
         fig, axs = plt.subplots(
             4, sharex=True, sharey=True, constrained_layout = True
@@ -237,7 +245,7 @@ class Plotter():
         while i < len(titles):
             axs[i].plot(x_plot_list, y1_plot_lists[i], color="blue")
             axs[i].plot(x_plot_list, y2_plot_lists[i], color="red")
-            axs[i].set_title(titles[i])
+            axs[i].set_title(f"{titles[i]}, MAE: {round(mae_list[i], 3)}", fontsize=10)
             i += 1
         # Label only outer sides of plots
         for ax in axs.flat:
@@ -245,8 +253,24 @@ class Plotter():
             ax.label_outer()
 
         # Define folder path relative to python file location, and save
+        fig.suptitle(f"{plot_name}, avg MAE: {round(avg_mae, 3)}", fontsize=10)
         fig_path = "{}/Plots/{}.png".format(os.path.dirname(__file__), plot_name)
         plt.savefig(fig_path)
+
+    def Compute_MAE(self, target, actual):
+        """
+        Calculates the Mean Absolute Error between the two given
+        datsets.
+        :param target: The target datatset
+        :param actual: The recorded dataset
+        :return: The MAE between two datasets
+        """
+        # Convert to numpy array
+        target, actual = np.array(target), np.array(actual)
+        # Compute and return MAE
+        mae = np.mean(np.abs(target - actual))
+        return mae
+
 
     def Plot_Select(self, mode: str, fname: str):
         """

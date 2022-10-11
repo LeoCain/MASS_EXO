@@ -11,22 +11,24 @@
     j) 'horizon' config issue
     k) memory leak error
     l) batch size
--   End render sim after certain number of seconds
 -   quantify difference between ref and actual
-2. Train benjaSIM with f0 parameter set to 0, to see the effect. - DONE
-    - visually removed the muscles, but benjaSIM still able to walk and flex knee
-      albeit with a limp.
 3. Train benjaSIM with only r_ee and r_v/only r_ee/r_ee - net activation energy used.
 11. train a normal version of benjaSIM for reference, record all its plots
 12. decide on a crippled model of benjaSIM
 13: use ray.tune to find optimal training batch size, lr, momentum 
-    - use scheduler (PBT?)
+    - use scheduler (PBT/PB2?)
     - should log and graph the results of each trial
     - would be good if can save the weights of the best one
     - WRITTEN BUT NEED TO CHECK FUNCTIONALITY -how many tune samples/stop case
 14: change reward so it doesn't corss over 0 - shoots to large positive or converges to 0   - CONVERGES TO 0
 9. visually show torque application
 
+
+
+-   End render sim after certain number of seconds - DONE
+2. Train benjaSIM with f0 parameter set to 0, to see the effect. - DONE
+    - visually removed the muscles, but benjaSIM still able to walk and flex knee
+      albeit with a limp.
 3. record different muscle group activations    - DONE
     a) knee flexion muscle group                - DONE
     b) knee extensor muscle group               - DONE
