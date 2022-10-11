@@ -12,6 +12,7 @@
     k) memory leak error
     l) batch size
 -   End render sim after certain number of seconds
+-   quantify difference between ref and actual
 2. Train benjaSIM with f0 parameter set to 0, to see the effect. - DONE
     - visually removed the muscles, but benjaSIM still able to walk and flex knee
       albeit with a limp.

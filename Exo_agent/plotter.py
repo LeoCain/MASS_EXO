@@ -41,29 +41,10 @@ class Plotter():
         ### Gait Phase ###
         self.num_wraparounds = 0
         self.gait_phase = []
-        
-        ### Initialise all plots (so can be cleared from funcs) ###
-        # fig, self.torque_axs = plt.subplots(
-        #     4, sharex=True, sharey=True, constrained_layout = True
-        #     )
-        # fig, self.angle_axs = plt.subplots(
-        #     4, sharex=True, sharey=True, constrained_layout = True
-        #     )
-        # fig, self.angle_comp_axs = plt.subplots(
-        #     4, sharex=True, sharey=True, constrained_layout = True
-        #     )
-        # fig, self.knee_axs = plt.subplots(
-        #     4, sharex=True, sharey=True, constrained_layout = True
-        #     )
-        # fig, self.hip_flex_ext_axs = plt.subplots(
-        #     4, sharex=True, sharey=True, constrained_layout = True
-        #     )
-        # fig, self.hip_add_abd_axs = plt.subplots(
-        #     4, sharex=True, sharey=True, constrained_layout = True
-        #     )
-        # fig, self.hip_int_ext_rot_axs = plt.subplots(
-        #     4, sharex=True, sharey=True, constrained_layout = True
-        #     )
+
+        ### plotter state variables ###
+        self.stop = False
+        self.plotted = False
 
     def Update_Torques(self, exo_torques):
         """
@@ -124,6 +105,7 @@ class Plotter():
         given phase wraps back around to 0.
         :param phase: the current phase of gait (mapped between
                             [0-1])
+        :return: whether the plotter should stop recording (so all plots have the same length)
         """
         phase = phase[0]
         # Check if a wraparound has occurred
@@ -138,6 +120,7 @@ class Plotter():
         # Compute current phase as number of wraps + gait_phase
         # print(f"Summed phase: {curr_phase}, phase: {phase}")
         curr_phase = self.num_wraparounds + phase
+        self.stop = (curr_phase >= 8)
         self.gait_phase.append(curr_phase)
 
     def Update_All_Exo(self, exo_torques, joint_angles_act, 
@@ -157,10 +140,15 @@ class Plotter():
             RHFlex,RHExt,RHAbd,RHAdd,RHExtRot,RHIntRot,RKFlex,RKExt,} 
         :param phase: current progression through the gait phase
         """
-        self.Update_Torques(exo_torques)
-        self.Update_Angles(joint_angles_act, joint_angles_ref)
-        self.Update_Activations(activations)
-        self.Update_Gait_Phase(phase)
+        if not self.stop:
+            self.Update_Gait_Phase(phase)
+            self.Update_Torques(exo_torques)
+            self.Update_Angles(joint_angles_act, joint_angles_ref)
+            self.Update_Activations(activations)
+        else:
+            self.Save_All_To_CSV_Exo()
+            self.Plot_All_Exo()
+            self.plotted = True
 
     def Update_All_SIM(self, joint_angles_act, joint_angles_ref, activations, phase):
         """
@@ -174,9 +162,14 @@ class Plotter():
             RHFlex,RHExt,RHAbd,RHAdd,RHExtRot,RHIntRot,RKFlex,RKExt,} 
         :param phase: current progression through the gait phase
         """
-        self.Update_Angles(joint_angles_act, joint_angles_ref)
-        self.Update_Activations(activations)
-        self.Update_Gait_Phase(phase)
+        if not self.stop:
+            self.Update_Gait_Phase(phase)
+            self.Update_Angles(joint_angles_act, joint_angles_ref)
+            self.Update_Activations(activations)
+        else:
+            self.Save_All_To_CSV_SIM()
+            self.Plot_All_SIM()
+            self.plotted = True
 
     def Plot_Info_Vertical(self, titles: list, y_plot_lists: list, x_plot_list: list,
     xlabel: str, ylabel: str, plot_name: str):
@@ -368,36 +361,40 @@ class Plotter():
         """
         Plots all collected data for the exo-applied environment
         """
-        self.Plot_Select("Torque", "Exo_Torque")
-        # print("============ Torque plotted ===========")
-        self.Plot_Select("Angle", "Exo_Angle")
-        # print("============ Angle plotted ===========")
-        self.Plot_Select("Angle Comp", "Exo_Angle_Comp")
-        self.Plot_Select("Knee activation", "Exo_Knee_Act")
-        # print("============ Knee plotted ===========")
-        self.Plot_Select("hip flex ext activation", "Exo_Hip_FE_act")
-        # print("============ hip1 plotted ===========")
-        self.Plot_Select("hip add abd activation", "Exo_Hip_AA_Act")
-        # print("============ hip2 plotted ===========")
-        self.Plot_Select("hip int ext rot activation", "Exo_Hip_IER_Act")
-        # print("============ hip3 plotted ===========")
+        if not self.plotted:
+            self.Plot_Select("Torque", "Exo_Torque")
+            # print("============ Torque plotted ===========")
+            self.Plot_Select("Angle", "Exo_Angle")
+            # print("============ Angle plotted ===========")
+            self.Plot_Select("Angle Comp", "Exo_Angle_Comp")
+            self.Plot_Select("Knee activation", "Exo_Knee_Act")
+            # print("============ Knee plotted ===========")
+            self.Plot_Select("hip flex ext activation", "Exo_Hip_FE_act")
+            # print("============ hip1 plotted ===========")
+            self.Plot_Select("hip add abd activation", "Exo_Hip_AA_Act")
+            # print("============ hip2 plotted ===========")
+            self.Plot_Select("hip int ext rot activation", "Exo_Hip_IER_Act")
+            # print("============ hip3 plotted ===========")
+            print("Data plotted")
     
     def Plot_All_SIM(self):
         """
         Plots all collected data for the original environment
         (no exo -> no exo torques plotted)
         """
-        self.Plot_Select("Angle", "SIM_Angle")
-        # print("============ Angle plotted ===========")
-        self.Plot_Select("Angle Comp", "SIM_Angle_Comp")
-        self.Plot_Select("Knee activation", "SIM_Knee_Act")
-        # print("============ Knee plotted ===========")
-        self.Plot_Select("hip flex ext activation", "SIM_Hip_FE_act")
-        # print("============ hip1 plotted ===========")
-        self.Plot_Select("hip add abd activation", "SIM_Hip_AA_Act")
-        # print("============ hip2 plotted ===========")
-        self.Plot_Select("hip int ext rot activation", "SIM_Hip_IER_Act")
-        # print("============ hip3 plotted ===========")
+        if not self.plotted:
+            self.Plot_Select("Angle", "SIM_Angle")
+            # print("============ Angle plotted ===========")
+            self.Plot_Select("Angle Comp", "SIM_Angle_Comp")
+            self.Plot_Select("Knee activation", "SIM_Knee_Act")
+            # print("============ Knee plotted ===========")
+            self.Plot_Select("hip flex ext activation", "SIM_Hip_FE_act")
+            # print("============ hip1 plotted ===========")
+            self.Plot_Select("hip add abd activation", "SIM_Hip_AA_Act")
+            # print("============ hip2 plotted ===========")
+            self.Plot_Select("hip int ext rot activation", "SIM_Hip_IER_Act")
+            # print("============ hip3 plotted ===========")
+            print("Data plotted")
 
     def Update_Plot_All(self, exo_torques, #TODO update actual angles
                         joint_angles, activations, phase):

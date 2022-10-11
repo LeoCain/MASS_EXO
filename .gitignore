@@ -2,5 +2,6 @@ build/
 *.so
 *.a
 nn/
+nn_knee_hip/
 nn_crip_knee/
 nn_norm/
