@@ -120,6 +120,7 @@ Initialize(const std::string& meta_file,bool load_obj)
 
 	this->Initialize();
 }
+
 void
 Environment::
 Initialize()
@@ -158,6 +159,7 @@ Initialize()
 	Reset(false);
 	mNumState = GetState().rows();
 }
+
 void
 Environment::
 Reset(bool RSI)
@@ -192,6 +194,7 @@ Reset(bool RSI)
 	mCharacter->GetSkeleton()->setVelocities(mTargetVelocities);
 	mCharacter->GetSkeleton()->computeForwardKinematics(true,false,false);
 }
+
 void
 Environment::
 Step()
@@ -206,7 +209,6 @@ Step()
 			muscle->ApplyForceToBody();
 		}
 		// TODO1: Verify that setForces does set TORQUE when called on joints (XS)
-		// TODO2: Write python code to verify that these forces can be set from inside python (XS)
 		Eigen::Vector3d T_LHip{GetLHipT(), 0, 0};
 		Eigen::Vector3d T_RHip{GetRHipT(), 0, 0};
 		Eigen::VectorXd T_RKnee = Eigen::VectorXd::Zero(1);
@@ -217,16 +219,6 @@ Step()
 		mCharacter->GetSkeleton()->getBodyNode("FemurR")->getParentJoint()->setForces(T_RHip); 
 		mCharacter->GetSkeleton()->getBodyNode("TibiaL")->getParentJoint()->setForces(T_LKnee);
 		mCharacter->GetSkeleton()->getBodyNode("TibiaR")->getParentJoint()->setForces(T_RKnee);
-
-		// double test_f = 20.0;
-		// use addExtForce() or addExtTorque
-
-		// vec.normalize();
-		// vec = test_f*vec;
-		// Eigen::Vector3d anchor{0, 0, 0};
-		// mCharacter->GetMuscles()[mCharacter->GetMuscles().size() - 1]->mAnchors[1]->bodynodes[0]->addExtForce(vec,anchor,false,false);
-		// mCharacter->GetSkeleton()->getBodyNode("FemurR")->addExtTorque(vec);
-		// mCharacter->GetMuscles()[mCharacter->GetMuscles().size() - 2]->mAnchors[0]->bodynodes[0]->addExtForce(vec,anchor,false,false);
 
 		if(mSimCount == mRandomSampleIndex)
 		{
@@ -278,7 +270,6 @@ Step()
 
 	mSimCount++;
 }
-
 
 Eigen::VectorXd
 Environment::
@@ -412,6 +403,21 @@ SetExoTorques(Eigen::VectorXd Ts)
 	SetRHipT(Ts[1]);
 	SetLKneeT(Ts[2]);
 	SetRKneeT(Ts[3]);
+}
+
+/**
+ * @brief Get Exo Joint Torques
+ * 
+ * @return Eigen::VectorXd containing joint torques in the order:
+ * [L_hip, L_knee, R_Hip, R_Knee]
+ */
+Eigen::VectorXd
+Environment::
+GetExoTorques()
+{
+	Eigen::VectorXd joint_torques(4);
+	joint_torques << GetLHipT(), GetLKneeT(), GetRHipT(), GetRKneeT();
+	return joint_torques;
 }
 
 /**

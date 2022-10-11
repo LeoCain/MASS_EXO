@@ -60,8 +60,8 @@ class MASS_env(Env):
         self.observation_space = Box(np.float32(obs_low_limit), np.float32(obs_high_limit))
 
         ### Load human control NNs ###
-        self.sim_NN = self.load_sim_NN("/home/medicalrobotics/MASS_EXO/nn/max.pt")
-        self.muscle_NN = self.load_muscle_NN("/home/medicalrobotics/MASS_EXO/nn/max_muscle.pt")
+        self.sim_NN = self.load_sim_NN("/home/medicalrobotics/MASS_EXO/nn_crip/max.pt")
+        self.muscle_NN = self.load_muscle_NN("/home/medicalrobotics/MASS_EXO/nn_crip/max_muscle.pt")
         
         ### Set environment-specific global vars ###
         self.num_simulation_Hz = self.sim_env.GetSimulationHz()
@@ -93,7 +93,7 @@ class MASS_env(Env):
 
         ### Define Reward ###
         r_T = ((abs(T_LHip) + abs(T_LKnee) + abs(T_RHip) + abs(T_RKnee))/4)
-        reward = 5 * self.sim_env.GetRewards()[0] - (r_T/40)
+        reward = 0 - (1/(self.sim_env.GetRewards()[0])) - (r_T/30) # Theoretical max reward of 0 - still needs tuning
 
         return self.state, reward, done, dict()
 

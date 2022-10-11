@@ -1,34 +1,60 @@
 1. optimise exo_agent (currently makes the gait worse).
     a) reward function
-    b) optimiser (try adam/different learning rates)
+    b) optimiser (try adam/different learning rates)    - using tune
     c) number of epochs
     d) neural net architechture
     e) adjust frequency of torque application?
     f) change c++ step to call python step?
     g) multiple workers?
-2. Train benjaSIM with f0 parameter set to 0, to see the effect.
+    h) play around with ray.tune()
+    i) torch vs tf                              - Minimal difference - use torch/whichever can solve memeory leak
+    j) 'horizon' config issue
+    k) memory leak error
+    l) batch size
+-   End render sim after certain number of seconds
+2. Train benjaSIM with f0 parameter set to 0, to see the effect. - DONE
+    - visually removed the muscles, but benjaSIM still able to walk and flex knee
+      albeit with a limp.
 3. Train benjaSIM with only r_ee and r_v/only r_ee/r_ee - net activation energy used.
-3. record different muscle group activations
-    a) knee flexion muscle group
-    b) knee extensor muscle group
-    c) hip flexion muscle group
-    d) hip extensor muscle group
-4. record torque applied at each joint
-    a) Left hip
-    b) Left knee
-    c) Right hip
-    d) Right knee
-5. record joint angles
-    a) Left hip
-    b) Left knee
-    c) Right hip
-    d) Right knee
-6. record reward during training
-    a) lower bound
-    b) upper bound
-    c) mean
-7. live graph recorded values
-    a) muscle group activations 
-    b) applied torques
-    c) joint angles
-    d) reward with bounds
+11. train a normal version of benjaSIM for reference, record all its plots
+12. decide on a crippled model of benjaSIM
+13: use ray.tune to find optimal training batch size, lr, momentum 
+    - use scheduler (PBT?)
+    - should log and graph the results of each trial
+    - would be good if can save the weights of the best one
+    - WRITTEN BUT NEED TO CHECK FUNCTIONALITY -how many tune samples/stop case
+14: change reward so it doesn't corss over 0 - shoots to large positive or converges to 0   - CONVERGES TO 0
+9. visually show torque application
+
+3. record different muscle group activations    - DONE
+    a) knee flexion muscle group                - DONE
+    b) knee extensor muscle group               - DONE
+    c) hip flexion muscle group                 - DONE
+    d) hip extensor muscle group                - DONE
+4. record torque applied at each joint  - DONE
+    a) Left hip                         - DONE
+    b) Left knee                        - DONE
+    c) Right hip                        - DONE
+    d) Right knee                       - DONE
+5. record joint angles                  - DONE
+    a) Left hip                         - DONE
+    b) Left knee                        - DONE
+    c) Right hip                        - DONE
+    d) Right knee                       - DONE
+6. record reward during training    - DONE
+    a) lower bound                  - DONE
+    b) upper bound                  - DONE
+    c) mean                         - DONE
+7. live graph recorded values - for exo env
+    a) muscle group activations     - DONE
+    b) applied torques              - DONE
+    c) joint angles                 - DONE
+    d) reward with bounds           - DONE
+    e) joint angles actual vs desired   - DONE
+8. live graph recorded values - for benjaSIM env
+    a) muscle group activations     - DONE
+    b) applied torques              - DONE 
+    c) joint angles                 - DONE
+    e) joint angles actual vs desired   - DONE     
+10. plot actual joint angles vs reference   - DONE
+

@@ -2,5 +2,5 @@ build/
 *.so
 *.a
 nn/
-nn_cp/
-nn_exo/
+nn_crip_knee/
+nn_norm/

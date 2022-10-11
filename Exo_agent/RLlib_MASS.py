@@ -13,6 +13,14 @@ from ray.rllib.models.torch.torch_modelv2 import TorchModelV2
 from ray.rllib.policy.torch_policy_template import build_torch_policy
 from ray.rllib.policy.sample_batch import SampleBatch
 from ray.tune.registry import register_env
+import ray
+import json
+# hyperparameter tuning dependencies
+from ray import air, tune
+from ray.tune.analysis import experiment_analysis, ExperimentAnalysis
+from ray.tune.schedulers import PopulationBasedTraining
+from ray.tune.schedulers.pb2 import PB2
+from ray.air.config import RunConfig
 # Neural Net dependencies (torch)
 import torch
 from torch import nn
@@ -20,48 +28,145 @@ import Model
 # Other standard libraries
 import os
 import numpy as np
+import matplotlib.pyplot as plt
 
 class Exo_Trainer():
-    def __init__(self) -> None:
+    def __init__(self, mode: str) -> None:
         """
         Initialise the RLlib PPO agent, check cuda is connected to GPU,
         create directory for saving policies.
+        :param mode: 'tune' or 'train' mode, tune for tuning hyperparams, train for 
+                    training using specified set of hyperparams. 
         """
-        print('ben was here')
         ### check that cuda has initialised correctly ###
         use_cuda = torch.cuda.is_available()
         print(f"============cuda available: {use_cuda}================")
 
         ### Create directory for saving RLlib policy ###
-        self.policy_path = "{}/policies/".format(os.path.dirname(__file__)) # Define folder path
+        self.policy_path = "{}/policies_torch/".format(os.path.dirname(__file__)) # Define folder path
 
         if not(os.path.isdir(self.policy_path)):
             os.mkdir(self.policy_path)
 
-        ### Initialise the environment and agent ###
+        ### Initialise the environment, agent, and tuner ###
         register_env("MASS_env", MASS_env)
         self.metafile_path = "/home/medicalrobotics/MASS_EXO/data/metadata.txt"
-        self.config = {
-            "env": "MASS_env",
-            "env_config": {
-                "meta_file": self.metafile_path,
+        if mode == 'tune':
+            self.tuner = self.Initialise_Tuner()
+        elif mode == 'train':
+            self.config = {
+                "env": "MASS_env",
+                "env_config": {
+                    "meta_file": self.metafile_path,
+                },
+                "framework": "torch",
+                "num_gpus": 1,
+                "num_workers": 5,
+                "num_envs_per_worker": 1,
+                "num_gpus_per_worker": 0.2,
+                "lr": 0.00005,
+                "lambda": 1.0,
+                "gamma": 0.999,
+                "horizon": 300,
+            }
+            print(f"============config saved================")
+            ppo_config = ppo.DEFAULT_CONFIG.copy()
+            ppo_config.update(self.config)
+            print(f"============config updated================")
+            self.agent = ppo.PPO(config=ppo_config)
+            print(f"============config applied ================")
+        else:
+            print("invalid mode entered")
+
+        ### create lists to store previous rewards, and an epoch counter ###
+        self.min_rewards = []
+        self.max_rewards = []
+        self.mean_rewards = []
+        self.epochs = 0
+
+        ### initialise ray? ###
+
+    def Initialise_Tuner(self):
+        """
+        Sets up the tuner config: Defines hyperparameter space to tune,
+        objective to optimise, environment, search algorithm and scheduler
+        :return: tuner object
+        """
+        ray.init()
+        PopBasedBandit = PB2(
+            time_attr="time_total_s",
+            
+            perturbation_interval=100,   # how often to re-consider chosen params
+            quantile_fraction=0.25,     # probability of copying good params to runs with bad params
+            # resample_probability=0.25,
+            # Specifies the mutations of these hyperparams
+            hyperparam_bounds={  # SGD Momentum?
+                # "lambda": [0.9, 0.95, 1.0],
+                "lr": [1e-3, 1e-5],
+                # "momentum":
+                # "num_sgd_iter": tune.randint(1, 30),
+                # "sgd_minibatch_size": [64, 128, 256, 512],
+                "train_batch_size": [5000, 60000],
             },
-            "framework": "torch",
-            "num_gpus": 1,
-            "num_gpus_per_worker": 1,
-            "num_workers": 1,
-            "lr": 0.0003,
-            "lambda": 0.1,
-            "gamma": 0.95,
-        }
-        print(f"============config saved================")
-        ppo_config = ppo.DEFAULT_CONFIG.copy()
-        ppo_config.update(self.config)
-        print(f"============config updated================")
-        self.agent = ppo.PPO(config=ppo_config)
-        print(f"============config applied ================")
-    
-    def Train_Exo(self, n):
+        )
+
+        tuner = tune.Tuner( # stop case for tuning, 
+            "PPO",
+            tune_config=tune.TuneConfig(
+                metric="episode_reward_mean",
+                mode="max",
+                scheduler=PopBasedBandit,
+                num_samples=6,  # increase this?
+            ),
+            run_config = RunConfig(
+                name="PB2_nw6_1",
+                local_dir = "{}/ray_tune_results".format(os.path.dirname(__file__)),
+                verbose=3,
+                # sync_config=tune.SyncConfig(upload_dir="s3://..."),
+                # checkpoint_config=air.CheckpointConfig(checkpoint_frequency=2),
+            ),
+            param_space = {
+                "env": MASS_env,
+                "env_config": {
+                    "meta_file": self.metafile_path,
+                },
+                "framework": "torch",
+                # "num_gpus": 1,
+                "num_workers": 1,
+                "num_envs_per_worker": 1,
+                "num_gpus_per_worker": 0.15,
+                # "lr": 0.0001,
+                "gamma": 0.999,
+                # "train_batch_size": 4000,
+                "lambda": 1.0,
+                "horizon": 300,
+                "log_level": 'INFO',
+            }
+        )
+
+        return tuner
+
+    def Tune_Params(self):
+        """
+        Tunes the specified hyperparameters
+        """
+        results = self.tuner.fit()
+
+        print("best hyperparameters: ", results.get_best_result(metric="episode_reward_mean").config)
+        # Plot by wall-clock time
+        analysis = ExperimentAnalysis("/home/medicalrobotics/ray_results/PPO")
+        dfs = analysis.fetch_trial_dataframes()
+        # This plots everything on the same plot
+        ax = None
+        for d in dfs.values():
+            ax = d.plot("training_iteration", "episode_reward_mean", ax=ax, legend=False)
+
+        plt.xlabel("iterations")
+        plt.ylabel("mean episode reward")
+
+        print('best config:', analysis.get_best_config("episode_reward_mean"))
+
+    def Train_Exo(self, n: int):
         """
         Train the agent for n iterations
         """
@@ -70,6 +175,8 @@ class Exo_Trainer():
         for n in range(n_iter):
             result = self.agent.train()
             chkpt_file = self.agent.save(self.policy_path)
+            self.epochs += 1
+            self.plot_reward(result["episode_reward_min"], result["episode_reward_mean"], result["episode_reward_max"])
             print(status.format(
                     n + 1,
                     result["episode_reward_min"],
@@ -91,9 +198,30 @@ class Exo_Trainer():
         Retrieves the action for the given state, by using the restored agent
         """
         return self.agent.compute_single_action(state) # right format for c++?
+    
+    def plot_reward(self, min, mean, max):
+        """
+        Plots the reward and saves the figure, overwriting previous one
+        """
+        self.min_rewards.append(min)
+        self.max_rewards.append(max)
+        self.mean_rewards.append(mean)
+        epoch_space = np.linspace(1, self.epochs, self.epochs)
+
+        plt.clf()
+        plt.plot(epoch_space, self.min_rewards, label = "Min episode reward", color="blue")
+        plt.plot(epoch_space, self.max_rewards, label = "Max episode reward", color="red")
+        plt.plot(epoch_space, self.mean_rewards, label = "Mean episode reward", color="orange")
+        plt.title("Episode Reward vs Number of Epochs (Torch)")
+        plt.xlabel("Number of Epochs")
+        plt.ylabel("Reward")
+        plt.legend()
+        plt.savefig("/home/medicalrobotics/MASS_EXO/Exo_agent/Plots/RewardPlot_torch.png")
+
 
 def debug():
-    ben = Exo_Trainer()
-    ben.Train_Exo(1000)
+    ben = Exo_Trainer('tune')
+    ben.Tune_Params()
+    # ben.Train_Exo(1000)
 
 debug()

@@ -1,0 +1,37 @@
+Failure # 1 (occurred at 2022-10-10_15-34-13)
+Traceback (most recent call last):
+  File "/home/medicalrobotics/.local/lib/python3.8/site-packages/ray/tune/execution/ray_trial_executor.py", line 989, in get_next_executor_event
+    future_result = ray.get(ready_future)
+  File "/home/medicalrobotics/.local/lib/python3.8/site-packages/ray/_private/client_mode_hook.py", line 105, in wrapper
+    return func(*args, **kwargs)
+  File "/home/medicalrobotics/.local/lib/python3.8/site-packages/ray/_private/worker.py", line 2277, in get
+    raise value
+ray.exceptions.RayActorError: The actor died because of an error raised in its creation task, [36mray::PPO.__init__()[39m (pid=651697, ip=10.152.72.135, repr=PPO)
+  File "/home/medicalrobotics/.local/lib/python3.8/site-packages/ray/rllib/evaluation/worker_set.py", line 125, in __init__
+    self.add_workers(
+  File "/home/medicalrobotics/.local/lib/python3.8/site-packages/ray/rllib/evaluation/worker_set.py", line 269, in add_workers
+    self.foreach_worker(lambda w: w.assert_healthy())
+  File "/home/medicalrobotics/.local/lib/python3.8/site-packages/ray/rllib/evaluation/worker_set.py", line 391, in foreach_worker
+    remote_results = ray.get([w.apply.remote(func) for w in self.remote_workers()])
+ray.exceptions.RayActorError: The actor died because of an error raised in its creation task, [36mray::RolloutWorker.__init__()[39m (pid=651852, ip=10.152.72.135, repr=<ray.rllib.evaluation.rollout_worker.RolloutWorker object at 0x7f487dbccf10>)
+  File "/home/medicalrobotics/.local/lib/python3.8/site-packages/ray/rllib/evaluation/rollout_worker.py", line 669, in __init__
+    self.async_env: BaseEnv = convert_to_base_env(
+  File "/home/medicalrobotics/.local/lib/python3.8/site-packages/ray/rllib/env/base_env.py", line 489, in convert_to_base_env
+    env = VectorEnvWrapper(env)
+  File "/home/medicalrobotics/.local/lib/python3.8/site-packages/ray/rllib/env/vector_env.py", line 354, in __init__
+    self._init_env_state(idx=None)
+  File "/home/medicalrobotics/.local/lib/python3.8/site-packages/ray/rllib/env/vector_env.py", line 467, in _init_env_state
+    self.new_obs = [None for _ in range(self.num_envs)]
+TypeError: 'float' object cannot be interpreted as an integer
+
+During handling of the above exception, another exception occurred:
+
+[36mray::PPO.__init__()[39m (pid=651697, ip=10.152.72.135, repr=PPO)
+  File "/home/medicalrobotics/.local/lib/python3.8/site-packages/ray/rllib/algorithms/algorithm.py", line 308, in __init__
+    super().__init__(config=config, logger_creator=logger_creator, **kwargs)
+  File "/home/medicalrobotics/.local/lib/python3.8/site-packages/ray/tune/trainable/trainable.py", line 157, in __init__
+    self.setup(copy.deepcopy(self.config))
+  File "/home/medicalrobotics/.local/lib/python3.8/site-packages/ray/rllib/algorithms/algorithm.py", line 443, in setup
+    raise e.args[0].args[2]
+TypeError: 'float' object cannot be interpreted as an integer
+

@@ -59,6 +59,8 @@ public:
 	bool GetUseMuscle(){return mUseMuscle;}
 
 	// Added by XS:
+	Eigen::VectorXd GetExoTorques();
+
 	// Setters and getters for the hip/knee joint torque vectors:
 	/**
 	 * @return Eigen::Vector3d representation of Left Hip Torque
@@ -105,6 +107,8 @@ public:
 	void SetRKneeT(float T){T_Knee_R = T;}
 
 	void SetExoTorques(Eigen::VectorXd Ts);
+
+	Eigen::VectorXd& GetTargetPositions(){return mTargetPositions;}
 
 private:
 	dart::simulation::WorldPtr mWorld;

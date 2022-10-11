@@ -20,9 +20,15 @@ public:
 	Window(Environment* env,const std::string& nn_path);
 	Window(Environment* env,const std::string& nn_path,const std::string& muscle_nn_path);
 
+    virtual void record_data();
+    virtual void define_muscle_groups();
+    virtual void Plot_And_Save();
+
 	void draw() override;
 	void keyboard(unsigned char _key, int _x, int _y) override;
 	void displayTimer(int _val) override;
+
+	py::object plotter;
 public:
 	void SetFocusing();
 
@@ -54,6 +60,43 @@ public:
 	bool mNNLoaded;
 	bool mMuscleNNLoaded;
 	Eigen::Affine3d mViewMatrix;
+
+	//muscle groups for plotting activation
+    enum MuscleGroupIndex {
+        LHFlex,
+        LHExt,
+        LHAbd,
+        LHAdd,
+        LHExtRot,
+        LHIntRot,
+        LKFlex,
+        LKExt,
+        RHFlex,
+        RHExt,
+        RHAbd,
+        RHAdd,
+        RHExtRot,
+        RHIntRot,
+        RKFlex,
+        RKExt,
+        TOTAL
+    };
+
+    struct MuscleGroup {
+        double total_activation;
+        std::unordered_set<std::string> group;
+
+        inline double add(double activation) {
+            total_activation += activation;
+            return total_activation;
+        }
+
+        inline double get_avg_activation() {
+            return total_activation / group.size();
+        }
+    };
+
+    std::array<MuscleGroup, MuscleGroupIndex::TOTAL> muscle_groups;
 };
 };
 

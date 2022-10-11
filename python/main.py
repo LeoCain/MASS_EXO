@@ -22,6 +22,7 @@ from Model import *
 
 # Set tensors based on whether GPU with cuda is available
 use_cuda = torch.cuda.is_available()
+print(f"==============={use_cuda}===============")
 FloatTensor = torch.cuda.FloatTensor if use_cuda else torch.FloatTensor
 LongTensor = torch.cuda.LongTensor if use_cuda else torch.LongTensor
 ByteTensor = torch.cuda.ByteTensor if use_cuda else torch.ByteTensor
@@ -371,7 +372,7 @@ class PPO(object):
 import matplotlib
 import matplotlib.pyplot as plt
 plt.style.use('ggplot')
-plt.ion()
+# plt.ion()
 
 def Plot(y,title,num_fig=1,ylim=True):
 	temp_y = np.zeros(y.shape)
@@ -397,7 +398,7 @@ def Plot(y,title,num_fig=1,ylim=True):
 		plt.ylim([0,1])
 	plt.pause(0.001)
 	plt.savefig('../png/Reward_Graph.png')
-	# plt.close()
+	plt.close()
 
 import argparse
 import os

@@ -4,8 +4,20 @@
 #include "Character.h"
 #include "BVH.h"
 #include "Muscle.h"
+#include <signal.h>
+
+MASS::Window* window;
+
+void SIGINT_handler(sig_atomic_t s){
+	std::cout << "\nSIGINT caught: Saving data, Finalising plots...";
+	window->Plot_And_Save();
+	exit(1); 
+}
+
 int main(int argc,char** argv)
 {
+	signal (SIGINT,SIGINT_handler);
+
 	MASS::Environment* env = new MASS::Environment();
 
 	if(argc==1)
@@ -36,7 +48,7 @@ int main(int argc,char** argv)
 
 	glutInit(&argc, argv);
 
-	MASS::Window* window;
+	// MASS::Window* window;
 	if(argc == 2)
 	{
 		window = new MASS::Window(env);
