@@ -5,3 +5,9 @@ nn/
 nn_knee_hip/
 nn_crip_knee/
 nn_norm/
+nn_knee_weak_rq/
+nn_knee_0.5rq/
+nn_knee_0.4rq/
+Exo_agent/policies/
+Exo_agent/policies_torch/
+Exo_agent/ray_tune_results/

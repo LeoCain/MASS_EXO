@@ -33,6 +33,7 @@ public:
 	void Reset(bool RSI,int id);
 	bool IsEndOfEpisode(int id);
 	double GetReward(int id);
+	const Eigen::VectorXd& GetGaitRewards();
 
 	void Steps(int num);
 	void StepsAtOnce();

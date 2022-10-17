@@ -1,6 +1,7 @@
 # Ensure we can still import pymss and Model
 import sys
 sys.path.append("/home/medicalrobotics/MASS_EXO/python")
+sys.path.append("/home/medicalrobotics/MASS_EXO")
 # DRL-related imports:
 from traceback import print_tb
 import torch
@@ -14,6 +15,7 @@ from ray.rllib.env.env_context import EnvContext
 # Standard mathmatical libraries
 import numpy as np
 import time
+import matplotlib.pyplot as plt
 # Environment building:
 from gym import Env
 from gym.spaces import Discrete, Box
@@ -32,11 +34,14 @@ class MASS_env(Env):
         Initial State
         Episode Length
         """
-        print("==================if you can see me i'M ALIVE==============")
+        # print("==================if you can see me i'M ALIVE==============")
         ### Setup env via EnvManager.cpp file ###
         meta_file = config["meta_file"]
+        sim_NN = config["sim_NN"]
+        muscle_NN = config["muscle_NN"]
         self.num_env_threads = 1
         self.sim_env = pymss.pymss(meta_file,self.num_env_threads)
+        # Keep track of number of resets (= to num episodes)
 
         ### Setting Up Action Space ###
         max_T = 80  # Maximum possible joint torque, Nm
@@ -49,30 +54,44 @@ class MASS_env(Env):
                 max_T,      # R knee torque
             ]
         )
-        self.action_space = Box(-np.float32(T_limit), np.float32(T_limit))
+        self.action_space = Box(-np.float64(T_limit), np.float64(T_limit), dtype=np.float64)
 
         ### Setting Up Observation Space ###
         # (actual motion, gait stage)
         # == ((pos_links_COM<x,y,z>, vel_links_COM<x,y,z>, gait_cycle_progress))
         state_dims = self.sim_env.GetNumState() # Dimension of the human model state description (pos, vel, gait stage) 
-        obs_low_limit = np.full(state_dims, -100)
-        obs_high_limit = np.full(state_dims, 100)
-        self.observation_space = Box(np.float32(obs_low_limit), np.float32(obs_high_limit))
+        obs_low_limit = np.full(state_dims, -1000.0)
+        obs_high_limit = np.full(state_dims, 1000.0)
+        self.observation_space = Box(np.float64(obs_low_limit), np.float64(obs_high_limit), dtype=np.float64)
 
         ### Load human control NNs ###
-        self.sim_NN = self.load_sim_NN("/home/medicalrobotics/MASS_EXO/nn_crip/max.pt")
-        self.muscle_NN = self.load_muscle_NN("/home/medicalrobotics/MASS_EXO/nn_crip/max_muscle.pt")
+        self.sim_NN = self.load_sim_NN(sim_NN)
+        self.muscle_NN = self.load_muscle_NN(muscle_NN)
         
         ### Set environment-specific global vars ###
         self.num_simulation_Hz = self.sim_env.GetSimulationHz()
         self.num_control_Hz = self.sim_env.GetControlHz()
-    
-        use_cuda = torch.cuda.is_available()
-        print(f"============{use_cuda}================")
-        self.Tensor = torch.cuda.FloatTensor
+
+        ### Declare trackables (variables I'm interested in tracking) ###
+        self.prevT_LHip, self.prevT_LKnee, self.prevT_RHip, self.prevT_RKnee =\
+            0, 0, 0, 0
+        self.prev_traj_r = 0
+        self.r_T_tot = 0
+
+        self.step_num = 0
+        self.num_eps = -1   # set to -1 because initial reset will iterate this
+
+        # keep track of original benjaSIM reward
+        self.orig_r_list = []
+        self.orig_r = 0 
 
         ### Call the environment reset, initialise the state ###
         self.state = self.reset()
+
+        ### Check GPU access, define GPU tensor ###
+        use_cuda = torch.cuda.is_available()
+        print(f"============{use_cuda}================")
+        self.Tensor = torch.cuda.FloatTensor
 
     def step(self, action):
         """
@@ -80,22 +99,64 @@ class MASS_env(Env):
         :param action: The action to apply, as defined by the action space
         :return: (resultant state, resultant reward, whether game is now terminal or not, some info[not used])
         """
+        # if self.num_eps >= 250:
+        #     print("============= Switched =============")
+        #     T_LHip, T_LKnee, T_RHip, T_RKnee = action
+
+        # else:
+        #     T_LHip, T_LKnee, T_RHip, T_RKnee = action
+        ### define trajectory bonus weight ###
+        # As the number of episodes increases, this bonus decreases, because
+        # the trajectory reward will get higher, and eventually cap out - 
+        # we dont want the model to purposely make bad trajectory so that it can
+        # improve and gain the bonus
+        t_w = 200/self.num_eps
+
         ### Apply action to environment (actuate exo) ###
         T_LHip, T_LKnee, T_RHip, T_RKnee = action
         self.set_joint_torques(T_LHip, T_LKnee, T_RHip, T_RKnee)
   
         ### Step to next state ###
         self.MASS_step()
-
+        
         ### Record relevant information ###
         self.state = self.sim_env.GetStates()[0]
         done = bool(self.sim_env.IsEndOfEpisodes()[0])
+        fall_cost = 0
+        if done and not(self.step_num >= 300):
+            fall_cost = (300 - self.step_num) * 10
 
         ### Define Reward ###
-        r_T = ((abs(T_LHip) + abs(T_LKnee) + abs(T_RHip) + abs(T_RKnee))/4)
-        reward = 0 - (1/(self.sim_env.GetRewards()[0])) - (r_T/30) # Theoretical max reward of 0 - still needs tuning
+        # reward due to torque magnitude
+        r_T = abs(T_LHip/80) + abs(T_LKnee/80) + \
+            abs(T_RHip/80) + abs(T_RKnee/80)
+        # reward due to closesness to desired trajectory
+        leg_traj_r = self.sim_env.GetGaitRewards()[0]
+        traj_r = self.sim_env.GetRewards()[0]
+        # reward due to change in torque magnitude
+        dL_hip = abs(self.prevT_LHip - T_LHip)/160
+        dL_knee = abs(self.prevT_LKnee - T_LKnee)/160
+        dR_hip = abs(self.prevT_RHip - T_RHip)/160
+        dR_knee = abs(self.prevT_RKnee - T_RKnee)/160
+        r_dT = dL_hip + dL_knee + dR_hip + dR_knee
+        # trajectory bonus (how much closer did agent get to traj target)
+        traj_bonus = (traj_r - self.prev_traj_r)*t_w
+        # final reward
+        reward = traj_r + leg_traj_r + 1 - (0.2*r_T) - (0.2*r_dT)
 
-        return self.state, reward, done, dict()
+        # original benjaSIM reward
+        self.orig_r += traj_r
+
+        # update tracked values
+        self.prevT_LHip - T_LHip
+        self.prevT_LKnee - T_LKnee
+        self.prevT_RHip - T_RHip
+        self.prevT_RKnee - T_RKnee
+        self.prev_traj_r = traj_r
+        self.step_num += 1
+        self.r_T_tot += r_T
+
+        return self.state, reward, done, {}
 
     def render(self, mode=''):
         """
@@ -108,9 +169,27 @@ class MASS_env(Env):
         """
         Resets the simulation
         """
-        # self.set_joint_torques(0, 0, 0, 0)
-        self.sim_env.Resets(False)
-        return self.sim_env.GetStates()[0]
+        ### Append original reward value for plotting ###
+        self.orig_r_list.append(self.orig_r)
+
+        ### print info regarding episode ###
+        if not (self.step_num==0) and self.num_eps%40 == 0:
+            avg_r_T = self.r_T_tot/self.step_num
+            print(f"avg rT = {avg_r_T}")
+
+        ### iterate/reset trackables ###
+        self.num_eps += 1
+        self.orig_r = 0 
+        self.step_num = 0
+        self.r_T_tot = 0
+
+        ### Reset the environment ###
+        # True indicates that benjaSIM will start in a randomised pose
+        self.sim_env.Resets(True)
+        
+        ### Retrieve new start state ###
+        state = self.sim_env.GetStates()[0]
+        return state
 
     def MASS_step(self):
         """
@@ -172,35 +251,62 @@ class MASS_env(Env):
         NN.load(path)
         return NN
         
+    def Plot_Original_Reward(self):
+        """
+        Live plots the agent's performance as according to the
+        original reward so that it can be compared to benjaSIM 
+        training runs.
+        """
+        ### average every group of 50 episode rewards ###
+        avg_r = []
+        curr_tot = 0
+        i = 0
+        while i<len(self.orig_r_list):
+            curr_tot += self.orig_r_list[i]
+            i += 1
+            if i % 50 == 0 and not(i == 0):
+                avg_r.append(curr_tot/50)
+                curr_tot = 0
+        ### plot average 'blocks' of episode rewards ###
+        num_blocks = np.linspace(0, len(avg_r) - 1, len(avg_r))
+        plt.clf()
+        plt.plot(num_blocks, avg_r, color="blue")
+
+        plt.title("Mean Episode [original] Reward")
+        plt.xlabel("Number of Episodes {*1000}")
+        plt.ylabel("Mean Reward")
+        plt.savefig("/home/medicalrobotics/MASS_EXO/Exo_agent/Plots/orig_reward.png")
 
 
 def debug_test():
     """
     Function purely for debugging and checking that the env is working as desired
     """
-    env = MASS_env("/home/medicalrobotics/MASS_EXO/data/metadata.txt")
-    done = False
-    i = 0
-    sim_time = time.time()
-    while (not done):
-        start = time.time()
-        state, reward, done, _ = env.step([0, 0, 0, 0])
-        i += 1
-        # while (time.time()-start < 0.030303):
-        #     continue
-        print(f"state {i}:\n    reward: {reward}\n    done: {done}\n    time: {state[-1]}")
-    sim_time = time.time()-sim_time
-    print(sim_time)
-    # print(env.observation_space)
-    # print(env.observation_space.shape)
-    # print(env.observation_space.low)
-    # print(env.observation_space.high)
-    # print(env.action_space)
-    # print(env.action_space.high)
-    # print(env.action_space.low)
-    # print(env.action_space.shape)   # (4,)
-    # print('#######################')
-    # print(env.state_dim)
-
-# debug_test()
+    env = MASS_env({
+        "meta_file":"/home/medicalrobotics/MASS_EXO/data/metadata.txt",
+        "sim_NN":"/home/medicalrobotics/MASS_EXO/nn_norm/max.pt",
+        "muscle_NN":"/home/medicalrobotics/MASS_EXO/nn_norm/max_muscle.pt",
+        })
+    j = 0
+    while j < 10:
+        tot_r = 0
+        state = env.reset()
+        done = False
+        i = 0
+        sim_time = time.time()
+        while (not done):
+            start = time.time()
+            state, reward, done, _ = env.step([0, 0, 0, 0])
+            tot_r += reward
+            i += 1
+            # while (time.time()-start < 0.030303):
+            #     continue
+            # print(f"state {i}:\n    reward: {reward}\n    done: {done}\n    time: {state[-1]}")
+        sim_time = time.time()-sim_time
+        print(tot_r, i)
+        # print(sim_time)
+        j += 1
+        
+if __name__ == "__main__":
+    debug_test()
         

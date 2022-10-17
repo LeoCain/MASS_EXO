@@ -1,5 +1,6 @@
 # Ensure we can still import pymss and Model
 import sys
+from tabnanny import verbose
 sys.path.append("/home/medicalrobotics/MASS_EXO/python")
 # Environment building:
 import gym
@@ -25,13 +26,15 @@ from ray.air.config import RunConfig
 import torch
 from torch import nn
 import Model
+from Exo_model import Actor_NN
 # Other standard libraries
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+import time
 
 class Exo_Trainer():
-    def __init__(self, mode: str) -> None:
+    def __init__(self, mode='train', restore_agent=False) -> None:
         """
         Initialise the RLlib PPO agent, check cuda is connected to GPU,
         create directory for saving policies.
@@ -43,38 +46,54 @@ class Exo_Trainer():
         print(f"============cuda available: {use_cuda}================")
 
         ### Create directory for saving RLlib policy ###
-        self.policy_path = "{}/policies_torch/".format(os.path.dirname(__file__)) # Define folder path
+        self.policy_path = "{}/policies/".format(os.path.dirname(__file__)) # Define folder path
 
         if not(os.path.isdir(self.policy_path)):
             os.mkdir(self.policy_path)
 
-        ### Initialise the environment, agent, and tuner ###
+        ### Initialise the environment, agent, tuner, network ###
+        ModelCatalog.register_custom_model("Actor_NN", Actor_NN)
         register_env("MASS_env", MASS_env)
-        self.metafile_path = "/home/medicalrobotics/MASS_EXO/data/metadata.txt"
+        self.metafile_path = "/home/medicalrobotics/MASS_EXO/data/metadata_crip.txt"
+        self.sim_NN_path = "/home/medicalrobotics/MASS_EXO/nn_knee_weak_rq/max.pt"
+        self.muscle_NN_path = "/home/medicalrobotics/MASS_EXO/nn_knee_weak_rq/max_muscle.pt"
         if mode == 'tune':
             self.tuner = self.Initialise_Tuner()
         elif mode == 'train':
             self.config = {
-                "env": "MASS_env",
+                "env": MASS_env,
                 "env_config": {
                     "meta_file": self.metafile_path,
+                    "sim_NN":self.sim_NN_path,
+                    "muscle_NN":self.muscle_NN_path,
+                },
+                "model": {
+                    "custom_model": "Actor_NN",
                 },
                 "framework": "torch",
-                "num_gpus": 1,
-                "num_workers": 5,
+                "num_gpus": 1.0/7.0,
+                "num_workers": 6,
                 "num_envs_per_worker": 1,
-                "num_gpus_per_worker": 0.2,
-                "lr": 0.00005,
+                "num_gpus_per_worker": 1.0/7.0,
+                "lr": 0.0001,
                 "lambda": 1.0,
                 "gamma": 0.999,
                 "horizon": 300,
+                "rollout_fragment_length": 200,
+                "train_batch_size": 8400,
+                "log_level": 'ERROR',
+                # note that this MUST occur:
+                # train_batch_size % (num_workers * rollout_fragment_length) == 0
             }
             print(f"============config saved================")
-            ppo_config = ppo.DEFAULT_CONFIG.copy()
-            ppo_config.update(self.config)
+            self.ppo_config = ppo.DEFAULT_CONFIG.copy()
+            self.ppo_config.update(self.config)
             print(f"============config updated================")
-            self.agent = ppo.PPO(config=ppo_config)
+            self.agent = ppo.PPO(config=self.ppo_config)
+            print(f"************{self.ppo_config}*********")
             print(f"============config applied ================")
+            if restore_agent:
+                pass
         else:
             print("invalid mode entered")
 
@@ -106,7 +125,7 @@ class Exo_Trainer():
                 # "momentum":
                 # "num_sgd_iter": tune.randint(1, 30),
                 # "sgd_minibatch_size": [64, 128, 256, 512],
-                "train_batch_size": [5000, 60000],
+                "train_batch_size": [3000, 60000],
             },
         )
 
@@ -132,7 +151,7 @@ class Exo_Trainer():
                 },
                 "framework": "torch",
                 # "num_gpus": 1,
-                "num_workers": 1,
+                "num_workers": 3,
                 "num_envs_per_worker": 1,
                 "num_gpus_per_worker": 0.15,
                 # "lr": 0.0001,
@@ -140,7 +159,7 @@ class Exo_Trainer():
                 # "train_batch_size": 4000,
                 "lambda": 1.0,
                 "horizon": 300,
-                "log_level": 'INFO',
+                # "log_level": 'INFO',
             }
         )
 
@@ -173,16 +192,25 @@ class Exo_Trainer():
         status = "{:2d} reward {:6.2f}/{:6.2f}/{:6.2f} len {:4.2f} saved {}"
         n_iter = n
         for n in range(n_iter):
+            # print(n)
             result = self.agent.train()
             chkpt_file = self.agent.save(self.policy_path)
             self.epochs += 1
             self.plot_reward(result["episode_reward_min"], result["episode_reward_mean"], result["episode_reward_max"])
+            if n%25==0 and not n==0:
+                print("========stopping...===========")
+                self.agent.stop()
+                time.sleep(1)
+                print("========stopped, reloading...===========")
+                self.agent = ppo.PPO(config=self.ppo_config)
+                print("========Reloaded===========")
+                self.Restore_Agent(chkpt_file)
             print(status.format(
                     n + 1,
                     result["episode_reward_min"],
                     result["episode_reward_mean"],
                     result["episode_reward_max"],
-                    result["episode_len_mean"],
+                    result["episode_len_mean"], 
                     chkpt_file
                     ))
 
@@ -215,13 +243,15 @@ class Exo_Trainer():
         plt.title("Episode Reward vs Number of Epochs (Torch)")
         plt.xlabel("Number of Epochs")
         plt.ylabel("Reward")
-        plt.legend()
+        plt.legend(loc='upper left')
         plt.savefig("/home/medicalrobotics/MASS_EXO/Exo_agent/Plots/RewardPlot_torch.png")
 
 
 def debug():
-    ben = Exo_Trainer('tune')
-    ben.Tune_Params()
-    # ben.Train_Exo(1000)
+    ben = Exo_Trainer('train')
+    # ben.Tune_Params()
+    ben.Train_Exo(5000)
+    # ben.Restore_Agent("/home/medicalrobotics/MASS_EXO/Exo_agent/policies_torch/checkpoint_000120")
 
-debug()
+if __name__ == "__main__":
+    debug()

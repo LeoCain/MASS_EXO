@@ -32,76 +32,45 @@ class Exo_Trainer():
         Initialise the RLlib PPO agent, check cuda is connected to GPU,
         create directory for saving policies.
         """
+        print('ben was here')
         ### check that cuda has initialised correctly ###
         use_cuda = torch.cuda.is_available()
         print(f"============cuda available: {use_cuda}================")
 
         ### Create directory for saving RLlib policy ###
-        self.policy_path = "{}/policies_torch/".format(os.path.dirname(__file__)) # Define folder path
+        self.policy_path = "{}/policies/".format(os.path.dirname(__file__)) # Define folder path
 
         if not(os.path.isdir(self.policy_path)):
             os.mkdir(self.policy_path)
 
-        ### Initialise the environment and ray tuner ###
-        self.metafile_path = "/home/medicalrobotics/MASS_EXO/data/metadata.txt"
-        self.tuner = self.Initialise_Tuner()
-
-        ### create lists to store previous rewards, and an epoch counter ###
+        ### Plotting setup ###
         self.min_rewards = []
         self.max_rewards = []
         self.mean_rewards = []
         self.epochs = 0
-
-        ### initialise ray? ###
-    
-    def Initialise_Tuner(self):
-        """
-        Sets up the tuner config: Defines hyperparameter space to tune,
-        objective to optimise, environment, search algorithm and scheduler
-        :return: tuner object
-        """
-        PBT = tune.PopulationBasedTraining(
-            time_attr="time_total_s",
-            perturbation_interval=120,
-            resample_probability=0.25,
-            # Specifies the mutations of these hyperparams
-            hyperparam_mutations={
-                "lambda": [0.9, 0.95, 1.0],
-                "lr": tune.uniform(1e-3, 1e-5),
-                "num_sgd_iter": tune.randint(1, 30),
-                "sgd_minibatch_size": [64, 128, 256, 512],
-                "train_batch_size": tune.randint(2000, 160000),
+        ### Initialise the environment and agent ###
+        register_env("MASS_env", MASS_env)
+        self.metafile_path = "/home/medicalrobotics/MASS_EXO/data/metadata_crip.txt"
+        self.config = {
+            "env": "MASS_env",
+            "env_config": {
+                "meta_file": self.metafile_path,
             },
-        )
-
-        tuner = tune.Tuner(
-            "PPO",
-            tune_config=tune.TuneConfig(
-                metric="episode_reward_mean",
-                mode="max",
-                scheduler=PBT,
-                num_samples=1,
-            ),
-            param_space = {
-                "env": MASS_env,
-                "env_config": {
-                    "meta_file": self.metafile_path,
-                },
-                "framework": "torch",
-                "num_gpus": 1,
-                "num_workers": 5,
-                "num_envs_per_worker": 1,
-                "num_gpus_per_worker": 0.2,
-                "lr": 0.0001,
-                "gamma": 0.999,
-                "train_batch_size": 4000,
-                "lambda": 1.0,
-            }
-        )
-
-        return tuner
-
-    def Tune_Params(self):
+            "framework": "torch",
+            "num_gpus": 1,
+            "num_gpus_per_worker": 1,
+            "num_workers": 1,
+            "lr": 0.0003,
+            "lambda": 0.1,
+            "gamma": 0.95,
+        }
+        print(f"============config saved================")
+        ppo_config = ppo.DEFAULT_CONFIG.copy()
+        ppo_config.update(self.config)
+        print(f"============config updated================")
+        self.agent = ppo.PPO(config=ppo_config)
+        print(f"============config applied ================")
+    
     def Train_Exo(self, n: int):
         """
         Train the agent for n iterations
@@ -155,8 +124,8 @@ class Exo_Trainer():
         plt.savefig("/home/medicalrobotics/MASS_EXO/Exo_agent/Plots/RewardPlot_torch.png")
 
 
-# def debug():
-#     ben = Exo_Trainer()
-#     ben.Train_Exo(1000)
+def debug():
+    ben = Exo_Trainer()
+    ben.Train_Exo(1000)
 
-# debug()
+debug()

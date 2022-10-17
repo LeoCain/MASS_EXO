@@ -324,7 +324,7 @@ IsEndOfEpisode()
 	Eigen::VectorXd v = mCharacter->GetSkeleton()->getVelocities();
 
 	double root_y = mCharacter->GetSkeleton()->getBodyNode(0)->getTransform().translation()[1] - mGround->getRootBodyNode()->getCOM()[1];
-	if(root_y<1.3)
+	if(root_y<1.3)	// Wait how tall is this guy
 		isTerminal =true;
 	else if (dart::math::isNan(p) || dart::math::isNan(v))
 		isTerminal =true;
@@ -482,6 +482,16 @@ GetReward()
 
 	// The norm of the differences are found. I think the second parameter is a weighting for the value, but I am unsure because
 	// weights are applied when computing the reward on line 410 (w_q, w_v are weights)
+	// These are errors but are added in the reward??
+	/*** compute exp of squared norms ***/
+	// squared norm is multipled by negative weight,
+	// thus, the bigger the difference, the closer to zero
+	// r_q/r_v will be, and the smaller the difference, the
+	// closer to 1 r_q/r_v will be. i.e. the difference is mapped
+	// between [0, 1], where the closer to 1, the less the diff is
+	// the weight multiplies the varience - i.e. a value that doesn't
+	// change very much can have a bigger weight, then the exp_of_squared
+	// changes will be easier to see
 	double r_q = exp_of_squared(p_diff,2.0);
 	double r_v = exp_of_squared(v_diff,0.1);		// isn't v_diff just a vector of zeros at this point?
 	double r_ee = exp_of_squared(ee_diff,40.0);	
@@ -489,7 +499,16 @@ GetReward()
 
 	double r = r_ee*(w_q*r_q + w_v*r_v);			// Why is r_com computed, but not used -> accounted for indirectly by r_ee? 
 													// even so, why would you compute it then? -XS
-
+	// double r = r_ee*(0.25*w_q*r_q + w_v*r_v);		// reduced_rq
+	// double r = r_ee*(0.5*w_q*r_q + w_v*r_v);		// rq_0.5
+	// double r = r_ee*(0.4*w_q*r_q + w_v*r_v);		// rq_0.4
+	
+	// double r = r_ee + w_v*r_v;					// no_rq
+	// double r = r_ee + w_v*r_v;
+	// double r = r_ee;
+	// double r = r_q;
+	// double r = r_v;
+	// double r = r_com;	// problem with r_com -> the firther benjaSIM moves from start pos, the worse it becomes
 													// Looked back at commit history of MASS and found r_com being used 
 													// They just did not remove it here - ZB
 
@@ -501,9 +520,91 @@ GetReward()
  * 
  * @return double representation of a modified reward for the exo joints
  */
-double Environment::GetTReward() {
-	double r_T = exp_of_squared(GetLHipT(), 10.0) + exp_of_squared(GetRHipT(), 10.0) + exp_of_squared(GetLKneeT(), 10.0) + exp_of_squared(GetRKneeT(), 10.0);
-	double rT = GetReward() - r_T;
+double 
+Environment::
+GetGaitReward() {
+	auto& skel = mCharacter->GetSkeleton();	// Retrieves the simulation model
 
-	return rT;
+	/*** define actual and reference knee and hip positions ***/
+	// Actual positions
+	double l_hip_act = skel->getBodyNode("FemurL")->getParentJoint()->getPositions()[0];
+	double r_hip_act = skel->getBodyNode("FemurR")->getParentJoint()->getPositions()[0];
+	double l_knee_act = skel->getBodyNode("TibiaL")->getParentJoint()->getPositions()[0];
+	double r_knee_act = skel->getBodyNode("TibiaR")->getParentJoint()->getPositions()[0];
+	// Reference positions
+	auto l_hip_joint_idx = skel->getBodyNode("FemurL")->getParentJoint()->getIndexInSkeleton(0);
+	auto r_hip_joint_idx = skel->getBodyNode("FemurR")->getParentJoint()->getIndexInSkeleton(0);
+	auto l_knee_joint_idx = skel->getBodyNode("TibiaL")->getParentJoint()->getIndexInSkeleton(0);
+	auto r_knee_joint_idx = skel->getBodyNode("TibiaR")->getParentJoint()->getIndexInSkeleton(0);	
+	double l_hip_ref =  mTargetPositions[l_hip_joint_idx];
+	double r_hip_ref = mTargetPositions[r_hip_joint_idx];
+	double l_knee_ref = mTargetPositions[l_knee_joint_idx];
+	double r_knee_ref = mTargetPositions[r_knee_joint_idx];
+	// Move into vectors	
+	Eigen::VectorXd joint_angles_act(4);
+	Eigen::VectorXd joint_angles_ref(4);
+	joint_angles_act << l_hip_act, l_knee_act, r_hip_act, r_knee_act;
+	joint_angles_ref << l_hip_ref, l_knee_ref, r_hip_ref, r_knee_ref;
+
+	/*** define actual and reference knee and hip velocities ***/
+	// Actual velocities
+	double l_hip_act_v = skel->getBodyNode("FemurL")->getParentJoint()->getVelocities()[0];
+	double r_hip_act_v = skel->getBodyNode("FemurR")->getParentJoint()->getVelocities()[0];
+	double l_knee_act_v = skel->getBodyNode("TibiaL")->getParentJoint()->getVelocities()[0];
+	double r_knee_act_v = skel->getBodyNode("TibiaR")->getParentJoint()->getVelocities()[0];
+	// Reference velocities
+	double l_hip_ref_v =  mTargetVelocities[l_hip_joint_idx];
+	double r_hip_ref_v = mTargetVelocities[r_hip_joint_idx];
+	double l_knee_ref_v = mTargetVelocities[l_knee_joint_idx];
+	double r_knee_ref_v = mTargetVelocities[r_knee_joint_idx];
+	// Move into vectors	
+	Eigen::VectorXd joint_angles_act_v(4);
+	Eigen::VectorXd joint_angles_ref_v(4);
+	joint_angles_act_v << l_hip_act_v, l_knee_act_v, r_hip_act_v, r_knee_act_v;
+	joint_angles_ref_v << l_hip_ref_v, l_knee_ref_v, r_hip_ref_v, r_knee_ref_v;
+
+	/*** find difference between reference and actual hip/knee positions/velocities ***/
+	Eigen::VectorXd p_diff = joint_angles_ref - joint_angles_act;	// Compute the difference between actual and target joint positions
+	Eigen::VectorXd v_diff = joint_angles_ref_v - joint_angles_act_v;	// Compute the difference between actual and target joint velocities
+
+	/*** collect foot endeffector positions ***/
+	// saves the current joint and COM positions of the simulation
+	Eigen::VectorXd cur_pos = skel->getPositions();		
+	Eigen::Vector3d com_diff = skel->getCOM();
+	// Actual positions
+	Eigen::Vector3d l_foot_act_diff = skel->getBodyNode("TalusL")->getCOM();
+	Eigen::Vector3d r_foot_act_diff = skel->getBodyNode("TalusR")->getCOM();
+	// move simulation to target position (do not render)
+	skel->setPositions(mTargetPositions);				
+	skel->computeForwardKinematics(true,false,false);
+	// calculate difference between target and actual foot position
+	com_diff -= skel->getCOM();
+	l_foot_act_diff = skel->getBodyNode("TalusL")->getCOM() - l_foot_act_diff + com_diff;
+	r_foot_act_diff = skel->getBodyNode("TalusR")->getCOM() - r_foot_act_diff + com_diff;
+	// move simulation back to actual position
+	skel->setPositions(cur_pos);
+	skel->computeForwardKinematics(true,false,false);
+	// save to vector
+	Eigen::VectorXd ee_diff(6);
+	ee_diff.segment<3>(0) = l_foot_act_diff;
+	ee_diff.segment<3>(3) = r_foot_act_diff;
+
+	/*** compute exp of squared norms ***/
+	// squared norm is multipled by negative weight,
+	// thus, the bigger the difference, the closer to zero
+	// r_q/r_v will be, and the smaller the difference, the
+	// closer to 1 r_q/r_v will be. i.e. the difference is mapped
+	// between [0, 1], where the closer to 1, the less the diff is
+	// the weight multiplies the varience - i.e. a value that doesn't
+	// change very much can have a bigger weight, then the exp_of_squared
+	// changes will be easier to see
+	double r_q = exp_of_squared(p_diff,2.0);
+	double r_v = exp_of_squared(v_diff,0.1);
+	double r_ee = exp_of_squared(ee_diff, 20.0);
+
+	/*** compute final reward ***/
+	// double rG = r_q;	// only_pos - larger is better
+	// double rG = r_ee;	// only_ee - larger is better
+	double rG = r_q + 0.25*r_v + r_ee;	// pos_vel - larger is better
+	return rG;
 }

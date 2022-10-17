@@ -81,7 +81,7 @@ Step()
 		for(int i=0;i<num;i++)
 			mEnv->Step();	
 	}
-	// std::cout << "step reward:" << mEnv->GetReward() << "state:" << mEnv->GetState() << '\n';
+	std::cout << "step reward:" << mEnv->GetReward() << "state:" << mEnv->GetState() << '\n';
 }
 
 /**

@@ -388,7 +388,7 @@ Step()
 		for(int i=0;i<num;i++)
 			mEnv->Step();	
 	}
-	// std::cout << "L Hip pos:" << mEnv->GetCharacter()->GetSkeleton()->getBodyNode("FemurL")->getParentJoint()->getPositions() << '\n';
+	std::cout << mEnv->GetGaitReward() << '\n';
 }
 void
 Window::

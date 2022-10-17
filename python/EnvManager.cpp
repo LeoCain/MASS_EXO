@@ -167,6 +167,16 @@ GetRewards()
 	}
 	return mRewards;
 }
+const Eigen::VectorXd&
+EnvManager::
+GetGaitRewards()
+{
+	for (int id = 0;id<mNumEnvs;++id)
+	{
+		mRewards[id] = mEnvs[id]->GetGaitReward();
+	}
+	return mRewards;
+}
 const Eigen::MatrixXd&
 EnvManager::
 GetMuscleTorques()
@@ -361,6 +371,7 @@ PYBIND11_MODULE(pymss, m)
 		.def("GetStates",&EnvManager::GetStates)
 		.def("SetActions",&EnvManager::SetActions)
 		.def("GetRewards",&EnvManager::GetRewards)
+		.def("GetGaitRewards",&EnvManager::GetGaitRewards)
 		.def("GetNumTotalMuscleRelatedDofs",&EnvManager::GetNumTotalMuscleRelatedDofs)
 		.def("GetNumMuscles",&EnvManager::GetNumMuscles)
 		.def("GetMuscleTorques",&EnvManager::GetMuscleTorques)
