@@ -77,11 +77,13 @@ class Exo_Trainer():
                 "num_gpus_per_worker": 1.0/7.0,
                 "lr": 0.0001,
                 "lambda": 1.0,
-                "gamma": 0.999,
+                "gamma": 0.99,
                 "horizon": 300,
                 "rollout_fragment_length": 200,
                 "train_batch_size": 8400,
                 "log_level": 'ERROR',
+                "clip_param": 0.2,
+                "grad_clip": 4,
                 # note that this MUST occur:
                 # train_batch_size % (num_workers * rollout_fragment_length) == 0
             }

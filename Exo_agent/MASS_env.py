@@ -77,6 +77,7 @@ class MASS_env(Env):
             0, 0, 0, 0
         self.prev_traj_r = 0
         self.r_T_tot = 0
+        self.r_dT_tot = 0
 
         self.step_num = 0
         self.num_eps = -1   # set to -1 because initial reset will iterate this
@@ -118,31 +119,41 @@ class MASS_env(Env):
   
         ### Step to next state ###
         self.MASS_step()
-        
-        ### Record relevant information ###
         self.state = self.sim_env.GetStates()[0]
-        done = bool(self.sim_env.IsEndOfEpisodes()[0])
+        
+        ### Handle terminal states ###
+        # Check if NaN values have made it through
+        done = np.any(np.isnan(self.state)) or bool(self.sim_env.IsEndOfEpisodes()[0])
+        
         fall_cost = 0
-        if done and not(self.step_num >= 300):
-            fall_cost = (300 - self.step_num) * 10
+        if done:    # Handle issue where NaN get through to RLlib worker
+            self.state = np.zeros_like(self.state)
+            if not(self.step_num >= 300):
+                fall_cost = np.exp(-self.step_num/300)
+            return self.state, -10*fall_cost, done, {}
 
-        ### Define Reward ###
+        ### Define Reward Components ###
         # reward due to torque magnitude
         r_T = abs(T_LHip/80) + abs(T_LKnee/80) + \
             abs(T_RHip/80) + abs(T_RKnee/80)
-        # reward due to closesness to desired trajectory
-        leg_traj_r = self.sim_env.GetGaitRewards()[0]
-        traj_r = self.sim_env.GetRewards()[0]
         # reward due to change in torque magnitude
         dL_hip = abs(self.prevT_LHip - T_LHip)/160
         dL_knee = abs(self.prevT_LKnee - T_LKnee)/160
         dR_hip = abs(self.prevT_RHip - T_RHip)/160
         dR_knee = abs(self.prevT_RKnee - T_RKnee)/160
-        r_dT = dL_hip + dL_knee + dR_hip + dR_knee
-        # trajectory bonus (how much closer did agent get to traj target)
-        traj_bonus = (traj_r - self.prev_traj_r)*t_w
-        # final reward
-        reward = traj_r + leg_traj_r + 1 - (0.2*r_T) - (0.2*r_dT)
+        r_dT = dL_hip + dL_knee + dR_hip + dR_knee + \
+            max(dL_hip, dL_knee, dR_hip, dR_knee)
+        # map torque rewards from [0, 4] -> {smaller better} 
+        # to [0, 1] -> {larger better}
+        r_T_map = np.exp(-r_T)
+        r_dT_map = np.exp(-2*r_dT)
+        # print(r_dT, r_dT_map)
+        # reward due to closesness to desired trajectory
+        leg_traj_r = self.sim_env.GetGaitRewards()[0]
+        traj_r = self.sim_env.GetRewards()[0]
+
+        ### Define Full reward ###
+        reward = traj_r + 2*leg_traj_r + r_T_map + 3*r_dT_map
 
         # original benjaSIM reward
         self.orig_r += traj_r
@@ -155,6 +166,7 @@ class MASS_env(Env):
         self.prev_traj_r = traj_r
         self.step_num += 1
         self.r_T_tot += r_T
+        self.r_dT_tot += r_dT
 
         return self.state, reward, done, {}
 
@@ -175,17 +187,19 @@ class MASS_env(Env):
         ### print info regarding episode ###
         if not (self.step_num==0) and self.num_eps%40 == 0:
             avg_r_T = self.r_T_tot/self.step_num
-            print(f"avg rT = {avg_r_T}")
+            avg_r_dT = self.r_dT_tot/self.step_num
+            print(f"avg r_T, r_dT = {avg_r_T}, {avg_r_dT}")
 
         ### iterate/reset trackables ###
         self.num_eps += 1
         self.orig_r = 0 
         self.step_num = 0
         self.r_T_tot = 0
+        self.r_dT_tot = 0
 
         ### Reset the environment ###
         # True indicates that benjaSIM will start in a randomised pose
-        self.sim_env.Resets(True)
+        self.sim_env.Resets(False)
         
         ### Retrieve new start state ###
         state = self.sim_env.GetStates()[0]
