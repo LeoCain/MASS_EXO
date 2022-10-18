@@ -34,6 +34,7 @@ public:
 	bool IsEndOfEpisode(int id);
 	double GetReward(int id);
 	const Eigen::VectorXd& GetGaitRewards();
+	const Eigen::MatrixXd& GetLegJointAngles();
 
 	void Steps(int num);
 	void StepsAtOnce();
@@ -72,7 +73,9 @@ private:
 
 	Eigen::VectorXd mEoe;
 	Eigen::VectorXd mRewards;
+	Eigen::VectorXd mGaitRewards;
 	Eigen::MatrixXd mStates;
+	Eigen::MatrixXd mAngles;
 	Eigen::MatrixXd mMuscleTorques;
 	Eigen::MatrixXd mDesiredTorques;
 

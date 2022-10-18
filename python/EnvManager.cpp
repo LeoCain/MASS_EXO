@@ -148,6 +148,17 @@ GetStates()
 
 	return mStates;
 }
+const Eigen::MatrixXd&
+EnvManager::
+GetLegJointAngles()
+{
+	for (int id = 0;id<mNumEnvs;++id)
+	{
+		mAngles.row(id) = mEnvs[id]->GetLegJointAngles().transpose();
+	}
+
+	return mAngles;
+}
 void
 EnvManager::
 SetActions(const Eigen::MatrixXd& actions)
@@ -372,6 +383,7 @@ PYBIND11_MODULE(pymss, m)
 		.def("SetActions",&EnvManager::SetActions)
 		.def("GetRewards",&EnvManager::GetRewards)
 		.def("GetGaitRewards",&EnvManager::GetGaitRewards)
+		.def("GetLegJointAngles",&EnvManager::GetLegJointAngles)
 		.def("GetNumTotalMuscleRelatedDofs",&EnvManager::GetNumTotalMuscleRelatedDofs)
 		.def("GetNumMuscles",&EnvManager::GetNumMuscles)
 		.def("GetMuscleTorques",&EnvManager::GetMuscleTorques)

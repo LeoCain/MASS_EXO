@@ -37,7 +37,6 @@ public:
 	Eigen::VectorXd GetState();
 	void SetAction(const Eigen::VectorXd& a);
 	double GetReward();
-	double GetGaitReward();
 
 	Eigen::VectorXd GetDesiredTorques();
 	Eigen::VectorXd GetMuscleTorques();
@@ -60,6 +59,8 @@ public:
 
 	// Added by XS:
 	Eigen::VectorXd GetExoTorques();
+	Eigen::VectorXd GetLegJointAngles();
+	double GetGaitReward();
 
 	// Setters and getters for the hip/knee joint torque vectors:
 	/**

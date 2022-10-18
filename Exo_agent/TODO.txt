@@ -16,6 +16,10 @@
     - would be good if can save the weights of the best one
     - WRITTEN BUT NEED TO CHECK FUNCTIONALITY -how many tune samples/stop case
 
+batch/group norm DONE
+lr scheduler
+smaller reward
+
 6. visually show torque application
 
 

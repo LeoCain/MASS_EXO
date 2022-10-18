@@ -16,6 +16,7 @@ from ray.rllib.policy.sample_batch import SampleBatch
 from ray.tune.registry import register_env
 import ray
 import json
+from ray.rllib.utils.schedules.polynomial_schedule import PolynomialSchedule
 # hyperparameter tuning dependencies
 from ray import air, tune
 from ray.tune.analysis import experiment_analysis, ExperimentAnalysis
@@ -51,6 +52,9 @@ class Exo_Trainer():
         if not(os.path.isdir(self.policy_path)):
             os.mkdir(self.policy_path)
 
+        ### setup learning rate scheduler ###
+        # lr_schedule = PolynomialSchedule()
+
         ### Initialise the environment, agent, tuner, network ###
         ModelCatalog.register_custom_model("Actor_NN", Actor_NN)
         register_env("MASS_env", MASS_env)
@@ -75,7 +79,7 @@ class Exo_Trainer():
                 "num_workers": 6,
                 "num_envs_per_worker": 1,
                 "num_gpus_per_worker": 1.0/7.0,
-                "lr": 0.0001,
+                "lr": 0.00005,
                 "lambda": 1.0,
                 "gamma": 0.99,
                 "horizon": 300,

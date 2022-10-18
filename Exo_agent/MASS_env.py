@@ -34,7 +34,7 @@ class MASS_env(Env):
         Initial State
         Episode Length
         """
-        # print("==================if you can see me i'M ALIVE==============")
+        # print("==================if you can see me I'M ALIVE==============")
         ### Setup env via EnvManager.cpp file ###
         meta_file = config["meta_file"]
         sim_NN = config["sim_NN"]
@@ -59,6 +59,7 @@ class MASS_env(Env):
         ### Setting Up Observation Space ###
         # (actual motion, gait stage)
         # == ((pos_links_COM<x,y,z>, vel_links_COM<x,y,z>, gait_cycle_progress))
+        # angle_dims = self.sim_env.GetLegJointAngles()[0].size
         state_dims = self.sim_env.GetNumState() # Dimension of the human model state description (pos, vel, gait stage) 
         obs_low_limit = np.full(state_dims, -1000.0)
         obs_high_limit = np.full(state_dims, 1000.0)
@@ -121,6 +122,7 @@ class MASS_env(Env):
         self.MASS_step()
         self.state = self.sim_env.GetStates()[0]
         
+        
         ### Handle terminal states ###
         # Check if NaN values have made it through
         done = np.any(np.isnan(self.state)) or bool(self.sim_env.IsEndOfEpisodes()[0])
@@ -130,8 +132,8 @@ class MASS_env(Env):
             self.state = np.zeros_like(self.state)
             if not(self.step_num >= 300):
                 fall_cost = np.exp(-self.step_num/300)
-            return self.state, -10*fall_cost, done, {}
-
+            return self.state, -4*fall_cost, done, {}
+        
         ### Define Reward Components ###
         # reward due to torque magnitude
         r_T = abs(T_LHip/80) + abs(T_LKnee/80) + \
@@ -151,10 +153,10 @@ class MASS_env(Env):
         # reward due to closesness to desired trajectory
         leg_traj_r = self.sim_env.GetGaitRewards()[0]
         traj_r = self.sim_env.GetRewards()[0]
-
+        
         ### Define Full reward ###
-        reward = traj_r + 2*leg_traj_r + r_T_map + 3*r_dT_map
-
+        reward = 0.1*traj_r + 0.3*leg_traj_r + 0.1*r_T_map + 0.5*r_dT_map
+       
         # original benjaSIM reward
         self.orig_r += traj_r
 

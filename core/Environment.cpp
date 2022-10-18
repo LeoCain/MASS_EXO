@@ -378,6 +378,7 @@ GetState()
 
 	return state;
 }
+
 void 
 Environment::
 SetAction(const Eigen::VectorXd& a)
@@ -515,11 +516,6 @@ GetReward()
 	return r;
 }
 
-/**self.sim_env.GetStates()
- * @brief 
- * 
- * @return double representation of a modified reward for the exo joints
- */
 double 
 Environment::
 GetGaitReward() {
@@ -607,4 +603,22 @@ GetGaitReward() {
 	// double rG = r_ee;	// only_ee - larger is better
 	double rG = r_q + 0.25*r_v + r_ee;	// pos_vel - larger is better
 	return rG;
+}
+
+Eigen::VectorXd 
+Environment::
+GetLegJointAngles()
+{
+	auto& skel = mCharacter->GetSkeleton();	// Retrieves the simulation model
+	/*** Find desired joint angles ***/
+	double l_hip_act = skel->getBodyNode("FemurL")->getParentJoint()->getPositions()[0];
+	double r_hip_act = skel->getBodyNode("FemurR")->getParentJoint()->getPositions()[0];
+	double l_knee_act = skel->getBodyNode("TibiaL")->getParentJoint()->getPositions()[0];
+	double r_knee_act = skel->getBodyNode("TibiaR")->getParentJoint()->getPositions()[0];
+
+	/*** Put into vector form ***/
+	Eigen::VectorXd joint_angles(4);
+	joint_angles << l_hip_act, l_knee_act, r_hip_act, r_knee_act;
+
+	return joint_angles;
 }
