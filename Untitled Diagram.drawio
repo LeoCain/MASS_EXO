@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2022-10-27T03:34:46.529Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36" etag="1xCQN8Xr0AH7Mcga8-VX" version="20.4.1" type="github">
+<mxfile host="app.diagrams.net" modified="2022-10-27T03:36:56.097Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36" etag="AEMUdR4SBtFN-AjNDv0h" version="20.4.1" type="github">
   <diagram id="C5RBs43oDa-KdzZeNtuy" name="Page-1">
     <mxGraphModel dx="1278" dy="539" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
@@ -7,7 +7,7 @@
         <mxCell id="IhsBr4k26jk_mUPnTSFp-13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="IhsBr4k26jk_mUPnTSFp-0" target="IhsBr4k26jk_mUPnTSFp-6">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="IhsBr4k26jk_mUPnTSFp-0" value="1. Design initial training algorithm architecture" style="swimlane;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+        <mxCell id="IhsBr4k26jk_mUPnTSFp-0" value="1. Design initial training algorithm architecture" style="swimlane;fillColor=#FF9999;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
           <mxGeometry x="120" width="540" height="130" as="geometry" />
         </mxCell>
         <mxCell id="IhsBr4k26jk_mUPnTSFp-3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="IhsBr4k26jk_mUPnTSFp-0" source="IhsBr4k26jk_mUPnTSFp-1" target="IhsBr4k26jk_mUPnTSFp-2">
@@ -20,45 +20,45 @@
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="IhsBr4k26jk_mUPnTSFp-2" value="Define sub-components (if any)." style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;" vertex="1" parent="IhsBr4k26jk_mUPnTSFp-0">
-          <mxGeometry x="190" y="40" width="100" height="70" as="geometry" />
+          <mxGeometry x="220" y="40" width="100" height="70" as="geometry" />
         </mxCell>
         <mxCell id="IhsBr4k26jk_mUPnTSFp-4" value="Roughly define reward function terms." style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;" vertex="1" parent="IhsBr4k26jk_mUPnTSFp-0">
-          <mxGeometry x="340" y="40" width="100" height="70" as="geometry" />
+          <mxGeometry x="400" y="40" width="100" height="70" as="geometry" />
         </mxCell>
         <mxCell id="IhsBr4k26jk_mUPnTSFp-25" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="IhsBr4k26jk_mUPnTSFp-6" target="IhsBr4k26jk_mUPnTSFp-17">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="IhsBr4k26jk_mUPnTSFp-6" value="2. Configure simulation environment" style="swimlane;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+        <mxCell id="IhsBr4k26jk_mUPnTSFp-6" value="2. Configure simulation environment" style="swimlane;fillColor=#E5CCFF;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
           <mxGeometry x="120" y="162" width="540" height="131" as="geometry" />
         </mxCell>
         <mxCell id="IhsBr4k26jk_mUPnTSFp-8" value="Create abnormal gait patient simulation for gait correction training." style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;" vertex="1" parent="IhsBr4k26jk_mUPnTSFp-6">
-          <mxGeometry x="272" y="41" width="127" height="70" as="geometry" />
+          <mxGeometry x="330" y="41" width="127" height="70" as="geometry" />
         </mxCell>
         <mxCell id="IhsBr4k26jk_mUPnTSFp-11" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="IhsBr4k26jk_mUPnTSFp-6" source="IhsBr4k26jk_mUPnTSFp-10" target="IhsBr4k26jk_mUPnTSFp-8">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="IhsBr4k26jk_mUPnTSFp-10" value="Select existing muscularskeletal framework." style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;" vertex="1" parent="IhsBr4k26jk_mUPnTSFp-6">
-          <mxGeometry x="63" y="41" width="127" height="70" as="geometry" />
+          <mxGeometry x="80" y="41" width="127" height="70" as="geometry" />
         </mxCell>
         <mxCell id="IhsBr4k26jk_mUPnTSFp-35" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="IhsBr4k26jk_mUPnTSFp-17" target="IhsBr4k26jk_mUPnTSFp-21">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="IhsBr4k26jk_mUPnTSFp-17" value="3. For each training algorithm sub-component:" style="swimlane;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+        <mxCell id="IhsBr4k26jk_mUPnTSFp-17" value="3. For each training algorithm sub-component:" style="swimlane;fillColor=#99FFFF;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
           <mxGeometry x="120" y="320" width="540" height="131" as="geometry" />
         </mxCell>
         <mxCell id="IhsBr4k26jk_mUPnTSFp-18" value="Tune reward function/ hyperparameters/ANN/ inputs and outputs until a good policy is formed." style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;" vertex="1" parent="IhsBr4k26jk_mUPnTSFp-17">
-          <mxGeometry x="271" y="41" width="133" height="70" as="geometry" />
+          <mxGeometry x="330" y="41" width="133" height="70" as="geometry" />
         </mxCell>
         <mxCell id="IhsBr4k26jk_mUPnTSFp-19" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="IhsBr4k26jk_mUPnTSFp-17" source="IhsBr4k26jk_mUPnTSFp-20" target="IhsBr4k26jk_mUPnTSFp-18">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="IhsBr4k26jk_mUPnTSFp-20" value="Integrate sub-component with simulation for training." style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;" vertex="1" parent="IhsBr4k26jk_mUPnTSFp-17">
-          <mxGeometry x="57" y="41" width="132" height="70" as="geometry" />
+          <mxGeometry x="80" y="41" width="132" height="70" as="geometry" />
         </mxCell>
         <mxCell id="IhsBr4k26jk_mUPnTSFp-53" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="IhsBr4k26jk_mUPnTSFp-21" target="IhsBr4k26jk_mUPnTSFp-36">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="IhsBr4k26jk_mUPnTSFp-21" value="4. Augment implementation for massive parallelisation with perturbation." style="swimlane;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+        <mxCell id="IhsBr4k26jk_mUPnTSFp-21" value="4. Augment implementation for massive parallelisation with perturbation." style="swimlane;fillColor=#E1D5E7;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
           <mxGeometry x="120" y="480" width="540" height="230" as="geometry" />
         </mxCell>
         <mxCell id="IhsBr4k26jk_mUPnTSFp-32" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="IhsBr4k26jk_mUPnTSFp-21" source="IhsBr4k26jk_mUPnTSFp-26" target="IhsBr4k26jk_mUPnTSFp-27">
@@ -98,7 +98,7 @@
         <mxCell id="IhsBr4k26jk_mUPnTSFp-66" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="IhsBr4k26jk_mUPnTSFp-36" target="IhsBr4k26jk_mUPnTSFp-55">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="IhsBr4k26jk_mUPnTSFp-36" value="5. Transfer to hardware" style="swimlane;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+        <mxCell id="IhsBr4k26jk_mUPnTSFp-36" value="5. Transfer to hardware" style="swimlane;fillColor=#99FF99;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
           <mxGeometry x="120" y="730" width="540" height="210" as="geometry" />
         </mxCell>
         <mxCell id="IhsBr4k26jk_mUPnTSFp-41" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="IhsBr4k26jk_mUPnTSFp-36" source="IhsBr4k26jk_mUPnTSFp-37" target="IhsBr4k26jk_mUPnTSFp-39">
@@ -137,7 +137,7 @@
         <mxCell id="IhsBr4k26jk_mUPnTSFp-47" value="Finish" style="rounded=1;whiteSpace=wrap;html=1;absoluteArcSize=1;arcSize=14;strokeWidth=2;" vertex="1" parent="IhsBr4k26jk_mUPnTSFp-36">
           <mxGeometry x="416" y="150" width="100" height="40" as="geometry" />
         </mxCell>
-        <mxCell id="IhsBr4k26jk_mUPnTSFp-55" value="5. Transfer to hardware" style="swimlane;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+        <mxCell id="IhsBr4k26jk_mUPnTSFp-55" value="5. Transfer to hardware" style="swimlane;fillColor=#FF3333;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
           <mxGeometry x="120" y="959" width="540" height="131" as="geometry" />
         </mxCell>
         <mxCell id="IhsBr4k26jk_mUPnTSFp-68" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="IhsBr4k26jk_mUPnTSFp-55" source="IhsBr4k26jk_mUPnTSFp-61" target="IhsBr4k26jk_mUPnTSFp-67">
