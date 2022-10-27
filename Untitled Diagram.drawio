@@ -1,6 +1,6 @@
-<mxfile host="app.diagrams.net" modified="2022-10-27T06:00:53.478Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36" etag="5HlNJTMF41vJ9WQpLv62" version="20.4.1" type="github">
+<mxfile host="app.diagrams.net" modified="2022-10-27T06:04:38.923Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36" etag="2v85EKU6LPWPG8u9AEJr" version="20.4.1" type="github">
   <diagram id="C5RBs43oDa-KdzZeNtuy" name="Page-1">
-    <mxGraphModel dx="1278" dy="481" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="1278" dy="539" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="WIyWlLk6GJQsqaUBKTNV-0" />
         <mxCell id="WIyWlLk6GJQsqaUBKTNV-1" parent="WIyWlLk6GJQsqaUBKTNV-0" />
@@ -167,7 +167,7 @@
         <mxCell id="IhsBr4k26jk_mUPnTSFp-75" value="&lt;b&gt;Goal:&lt;/b&gt;&amp;nbsp;To create a GPU-parallelised simulation environment, with perturbations applied. This stage also involves evaluating the effect of parallelisation and perturbations on algorithm robustness and generalisation." style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#E1D5E7;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
           <mxGeometry x="600" y="480" width="190" height="230" as="geometry" />
         </mxCell>
-        <mxCell id="IhsBr4k26jk_mUPnTSFp-76" value="&lt;b&gt;Goal:&lt;/b&gt;&amp;nbsp;To optimise the transfer from simulation to hardware by minimising the loss in robustness and versatility through adjustment of training hyperparameters, parallelisation settings (number of instances, etc), and the type, frequency, and magnitude of perturbations." style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#99FF99;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+        <mxCell id="IhsBr4k26jk_mUPnTSFp-76" value="&lt;b&gt;Goal:&lt;/b&gt;&amp;nbsp;To optimise the transfer from simulation to hardware by minimising the loss of robustness and versatility through adjustment of training hyperparameters, parallelisation settings (number of instances, etc), and the type, frequency, and magnitude of perturbations." style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#99FF99;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
           <mxGeometry x="600" y="730" width="190" height="210" as="geometry" />
         </mxCell>
         <mxCell id="IhsBr4k26jk_mUPnTSFp-77" value="&lt;b&gt;Goal:&lt;/b&gt;&amp;nbsp;To investigate and evaluate the transfer of a DRL algorithm which was trained on a GPU-parallelised environment to a hardware exoskeleton system designed for stroke patient gait rehabilitation." style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#FF3333;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
