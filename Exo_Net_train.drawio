@@ -1,6 +1,6 @@
-<mxfile host="app.diagrams.net" modified="2022-10-18T12:59:40.424Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36" etag="6b3ZztoICN5JcnldzqKA" version="20.4.1" type="github">
+<mxfile host="app.diagrams.net" modified="2022-10-28T03:08:42.494Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36" etag="CKEDoOE-f9IahRczxvIc" version="20.5.1" type="github">
   <diagram id="V4jYS8Cx0HoniuE-XB6-" name="Page-1">
-    <mxGraphModel dx="2195" dy="1667" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="2128" dy="1639" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -120,7 +120,7 @@
         <mxCell id="VJMz_R_mShoQIZPHi_DP-16" value="Activation_Net" style="swimlane;startSize=23;fillColor=#99FFFF;" parent="1" vertex="1">
           <mxGeometry x="-140" y="18" width="270" height="262" as="geometry" />
         </mxCell>
-        <mxCell id="Wi4BLHU90clKVonepebe-5" value="Loss Function or adverserial network model" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;" parent="VJMz_R_mShoQIZPHi_DP-16" vertex="1">
+        <mxCell id="Wi4BLHU90clKVonepebe-5" value="Loss Function" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;" parent="VJMz_R_mShoQIZPHi_DP-16" vertex="1">
           <mxGeometry x="130" y="182" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="Wi4BLHU90clKVonepebe-9" value="Deep Neural Net (DNN) which maps exo parameters and patient measurements to muscle activations. Also outputs a confidence value, which represents how confident the Net is of it&#39;s activation predictions" style="rounded=0;whiteSpace=wrap;html=1;" parent="VJMz_R_mShoQIZPHi_DP-16" vertex="1">
@@ -145,7 +145,12 @@
           <mxGeometry x="-50" y="280" width="192" height="110" as="geometry" />
         </mxCell>
         <mxCell id="Wi4BLHU90clKVonepebe-7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0;exitDx=100;exitDy=20.1;exitPerimeter=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="Wi4BLHU90clKVonepebe-2" target="Wi4BLHU90clKVonepebe-5" edge="1">
-          <mxGeometry relative="1" as="geometry" />
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="120" y="220" />
+              <mxPoint x="120" y="230" />
+            </Array>
+          </mxGeometry>
         </mxCell>
         <mxCell id="Wi4BLHU90clKVonepebe-2" value="Actual &lt;br&gt;muscle &lt;br&gt;activations" style="html=1;shadow=0;dashed=0;align=center;verticalAlign=middle;shape=mxgraph.arrows2.bendArrow;dy=15;dx=38;notch=0;arrowHead=40.2;rounded=1;fillColor=#E5CCFF;flipH=1;" parent="1" vertex="1">
           <mxGeometry x="130" y="200" width="100" height="130" as="geometry" />
