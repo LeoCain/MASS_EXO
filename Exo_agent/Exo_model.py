@@ -21,16 +21,16 @@ class Actor_NN(TorchModelV2, nn.Module):
         fc1 = nn.Linear(obs_space.shape[0], 256)
         fc2 = nn.Linear(256, 256)
         fc3 = nn.Linear(256, 256)
+        fc4 = nn.Linear(256, 256)
         self.hidden_layers = nn.Sequential(
             fc1,
             nn.LeakyReLU(0.2, inplace=True),
-            nn.GroupNorm(4, 256),
             fc2,
             nn.LeakyReLU(0.2, inplace=True),
-            nn.GroupNorm(4, 256),
             fc3,
             nn.LeakyReLU(0.2, inplace=True),
-            nn.GroupNorm(4, 256),
+            fc4,
+            nn.LeakyReLU(0.2, inplace=True),
         )
         # output layers
         self.to_logits = nn.Linear(256, num_outputs)
@@ -40,7 +40,13 @@ class Actor_NN(TorchModelV2, nn.Module):
         torch.nn.init.xavier_uniform_(fc1.weight)
         torch.nn.init.xavier_uniform_(fc2.weight)
         torch.nn.init.xavier_uniform_(fc3.weight)
+        torch.nn.init.xavier_uniform_(fc4.weight)
         torch.nn.init.xavier_uniform_(self.to_logits.weight)
+        
+        fc1.bias.data.zero_()
+        fc2.bias.data.zero_()
+        fc3.bias.data.zero_()
+        fc4.bias.data.zero_()
 
         self._output = None
 
@@ -48,6 +54,7 @@ class Actor_NN(TorchModelV2, nn.Module):
         inputs = input_dict["obs"]
         self._output = self.hidden_layers(inputs)
         logits = self.to_logits(self._output)
+
         return logits, state
 
     def value_function(self):

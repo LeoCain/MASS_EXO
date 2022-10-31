@@ -101,18 +101,13 @@ class MASS_env(Env):
         :param action: The action to apply, as defined by the action space
         :return: (resultant state, resultant reward, whether game is now terminal or not, some info[not used])
         """
-        # if self.num_eps >= 250:
-        #     print("============= Switched =============")
-        #     T_LHip, T_LKnee, T_RHip, T_RKnee = action
+        # if self.num_eps >= 75:
+        #     if self.num_eps == 75:
+        #         print("============= Switched =============")
+        #     apply_action = True
 
         # else:
-        #     T_LHip, T_LKnee, T_RHip, T_RKnee = action
-        ### define trajectory bonus weight ###
-        # As the number of episodes increases, this bonus decreases, because
-        # the trajectory reward will get higher, and eventually cap out - 
-        # we dont want the model to purposely make bad trajectory so that it can
-        # improve and gain the bonus
-        t_w = 200/self.num_eps
+        #     apply_action = False
 
         ### Apply action to environment (actuate exo) ###
         T_LHip, T_LKnee, T_RHip, T_RKnee = action
@@ -122,7 +117,6 @@ class MASS_env(Env):
         self.MASS_step()
         self.state = self.sim_env.GetStates()[0]
         
-        
         ### Handle terminal states ###
         # Check if NaN values have made it through
         done = np.any(np.isnan(self.state)) or bool(self.sim_env.IsEndOfEpisodes()[0])
@@ -131,8 +125,8 @@ class MASS_env(Env):
         if done:    # Handle issue where NaN get through to RLlib worker
             self.state = np.zeros_like(self.state)
             if not(self.step_num >= 300):
-                fall_cost = np.exp(-self.step_num/300)
-            return self.state, -4*fall_cost, done, {}
+                fall_cost = 0
+            return self.state, fall_cost, done, {}
         
         ### Define Reward Components ###
         # reward due to torque magnitude
@@ -155,16 +149,16 @@ class MASS_env(Env):
         traj_r = self.sim_env.GetRewards()[0]
         
         ### Define Full reward ###
-        reward = 0.1*traj_r + 0.3*leg_traj_r + 0.1*r_T_map + 0.5*r_dT_map
+        reward = 0.1*traj_r + 0.3*leg_traj_r + 0.25*r_T_map + 0.35*r_dT_map
        
         # original benjaSIM reward
         self.orig_r += traj_r
 
         # update tracked values
-        self.prevT_LHip - T_LHip
-        self.prevT_LKnee - T_LKnee
-        self.prevT_RHip - T_RHip
-        self.prevT_RKnee - T_RKnee
+        self.prevT_LHip = T_LHip
+        self.prevT_LKnee = T_LKnee
+        self.prevT_RHip = T_RHip
+        self.prevT_RKnee = T_RKnee
         self.prev_traj_r = traj_r
         self.step_num += 1
         self.r_T_tot += r_T
@@ -312,7 +306,7 @@ def debug_test():
         sim_time = time.time()
         while (not done):
             start = time.time()
-            state, reward, done, _ = env.step([0, 0, 0, 0])
+            state, reward, done, _ = env.step([80, 80, 80, 80])
             tot_r += reward
             i += 1
             # while (time.time()-start < 0.030303):
