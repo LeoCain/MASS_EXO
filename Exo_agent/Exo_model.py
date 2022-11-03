@@ -24,12 +24,16 @@ class Actor_NN(TorchModelV2, nn.Module):
         fc4 = nn.Linear(256, 256)
         self.hidden_layers = nn.Sequential(
             fc1,
+            nn.GroupNorm(4, 256),
             nn.LeakyReLU(0.2, inplace=True),
             fc2,
+            nn.GroupNorm(4, 256),
             nn.LeakyReLU(0.2, inplace=True),
             fc3,
+            nn.GroupNorm(4, 256),
             nn.LeakyReLU(0.2, inplace=True),
             fc4,
+            nn.GroupNorm(4, 256),
             nn.LeakyReLU(0.2, inplace=True),
         )
         # output layers
