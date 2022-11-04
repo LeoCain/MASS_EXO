@@ -86,7 +86,7 @@ MASS_env.py
 
 Unfortunately, if the user wishes to modify these two files, the copies must be deleted from the build folder, then the originals can be modified, and re-copied back into the build folder. This could probably be fixed by making a modification to the cmake files, but due to time constraints, I did not get around to it.
 
-### Compile and Run simulation controller (not the exoskeleton agent)
+### Compile and Run simulation (not the exoskeleton agent)
 
 Navigate to the MASS_EXO folder, cmake and compile:
 
@@ -180,6 +180,11 @@ S: step the simulation forward once.
 **python:** Contains most of the functional code for running the MASS training algorithm.
 
 **render:** Contains the main loop code for the MASS simulation, and the software for rendering it.
+
+**nn_example:** Contains an example of the two weight files for the MASS sim simulation. These are for the unmodified XML config files, and the resultant sim can be viewed by executing:
+```bash
+./render/render ../data/metadata.txt ../nn_example/max.pt ../nn_example/max_muscle.pt
+```
 
 ## Model Creation & Retargeting (This module is ongoing project.)
 
