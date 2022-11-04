@@ -124,7 +124,7 @@ source /path/to/virtualenv/
 ./render/render ../data/metadata.txt ../nn/xxx.pt
 ```
 
-###Training and Running the Exoskeleton Agent
+### Training and Running the Exoskeleton Agent
 Make sure any changes are compiled:
 ```bash
 cd build  
@@ -152,7 +152,34 @@ You will observe a lot of warnings - the repeated ones are normal, and from insi
 This may take a little while to boot up, but eventually the UI should appear.
 
 ### UI usage guide:
+The UI boots up as a separate window - there are no buttons but the view can be moved by dragging the screen using your mouse. There are also some key commands:
 
+spacebar: Start/stop simulation.
+
+R: Restart simulation.
+
+O: Toggle between basic box model and skeleton render model.
+
+F: Follow the model with the viewer.
+
+S: step the simulation forward once.
+
+## Repository Summary
+
+### Top-Level Directory Summary
+**Exo_agent:** Contains all the files needed to train, run and render the exoskeleton agent within the MASS simulation environment. Also contains folders for raw csv data and plots.
+
+**Thesis_Folder:** Contains plots from different simulation that have been run (for both the MASS SIM, and the exoskeleton agent SIM).
+
+**core:** Contains most of the functional code for the MASS simulation, including environment initialisation and stepping, reward calculations, etc.
+
+**data:** Contains metadata files, skeletal and muscular XML config files, BVH motion reference files, and object files for the skeleton.
+
+**png:** Directory that the MASS reward function progression graph is saved to.
+
+**python:** Contains most of the functional code for running the MASS training algorithm.
+
+**render:** Contains the main loop code for the MASS simulation, and the software for rendering it.
 
 ## Model Creation & Retargeting (This module is ongoing project.)
 
