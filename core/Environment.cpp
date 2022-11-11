@@ -8,10 +8,13 @@ using namespace dart;
 using namespace dart::simulation;
 using namespace dart::dynamics;
 using namespace MASS;
+/**
+ * File for setting up/configuring/stepping the simulation environment.
+ */
 
 Environment::
 Environment()
-	:mControlHz(30),mSimulationHz(900),mWorld(std::make_shared<World>()),mUseMuscle(true),w_q(0.65),w_v(0.1),w_ee(0.15),w_com(0.1)	// numbers in brackets??
+	:mControlHz(30),mSimulationHz(900),mWorld(std::make_shared<World>()),mUseMuscle(true),w_q(0.65),w_v(0.1),w_ee(0.15),w_com(0.1)
 {
 
 }
@@ -86,12 +89,6 @@ Initialize(const std::string& meta_file,bool load_obj)
 			if(this->GetUseMuscle())
 				character->LoadMuscles(std::string(MASS_ROOT_DIR)+str2);
 		}
-		else if(!index.compare("exo_file")){
-			std::string str2;
-			printf("In\n");
-			ss>>str2;
-			exo_model = character->LoadExo(std::string(MASS_ROOT_DIR)+str2);
-		}
 		else if(!index.compare("bvh_file")){	// This is the reference motion file.
 			std::string str2,str3;
 
@@ -160,6 +157,14 @@ Initialize()
 	mNumState = GetState().rows();
 }
 
+/**
+ * @brief Resets the DART simulation, as well as MASS
+ * models and the exoAgent.
+ * 
+ * @param RSI - when true, this sets the start
+ * time between 0 - 0.9*max time, where max time
+ * is 10 seconds
+ */
 void
 Environment::
 Reset(bool RSI)
@@ -179,7 +184,7 @@ Reset(bool RSI)
 	
 	double t = 0.0;	// Set time to 0
 
-	if(RSI)	// sets time randomly between 0 and 0.9*max time, not sure of the purpose
+	if(RSI)	// sets time randomly between 0 and 0.9*max time
 		t = dart::math::random(0.0,mCharacter->GetBVH()->GetMaxTime()*0.9);
 	mWorld->setTime(t); 
 	mCharacter->Reset();
@@ -208,14 +213,18 @@ Step()
 			muscle->Update();
 			muscle->ApplyForceToBody();
 		}
+		Eigen::VectorXd holdUp = Eigen::VectorXd::Zero(6);
+		holdUp << 0, 0, 0, 0, 255, 0;
 		// TODO1: Verify that setForces does set TORQUE when called on joints (XS)
+		mCharacter->GetSkeleton()->getBodyNode("Pelvis")->getParentJoint()->setForces(holdUp);
 		Eigen::Vector3d T_LHip{GetLHipT(), 0, 0};
 		Eigen::Vector3d T_RHip{GetRHipT(), 0, 0};
 		Eigen::VectorXd T_RKnee = Eigen::VectorXd::Zero(1);
 		T_RKnee << GetLKneeT();
 		Eigen::VectorXd T_LKnee = Eigen::VectorXd::Zero(1);
 		T_LKnee << GetRKneeT();
-		mCharacter->GetSkeleton()->getBodyNode("FemurL")->getParentJoint()->setForces(T_LHip); // does this apply a force or torque?
+		// apply exo agent torques to the simulation
+		mCharacter->GetSkeleton()->getBodyNode("FemurL")->getParentJoint()->setForces(T_LHip);
 		mCharacter->GetSkeleton()->getBodyNode("FemurR")->getParentJoint()->setForces(T_RHip); 
 		mCharacter->GetSkeleton()->getBodyNode("TibiaL")->getParentJoint()->setForces(T_LKnee);
 		mCharacter->GetSkeleton()->getBodyNode("TibiaR")->getParentJoint()->setForces(T_RKnee);
@@ -260,7 +269,7 @@ Step()
 		mCharacter->GetSkeleton()->setForces(mDesiredTorque);
 	}
 
-	mWorld->step();
+	mWorld->step();	// step DARTsim
 	// Eigen::VectorXd p_des = mTargetPositions;
 	// //p_des.tail(mAction.rows()) += mAction;
 	// mCharacter->GetSkeleton()->setPositions(p_des);
@@ -271,17 +280,33 @@ Step()
 	mSimCount++;
 }
 
+/**
+ * @brief Calls the PD controller to retrieve the
+ * joint torques required to reach the position
+ * targets.
+ * 
+ * @return Eigen::VectorXd joint torques required to 
+ * reach position targets
+ */
 Eigen::VectorXd
 Environment::
 GetDesiredTorques()
 {
-	Eigen::VectorXd p_des = mTargetPositions;						// Retrieve target positions of joints? DOFs?
-	p_des.tail(mTargetPositions.rows()-mRootJointDof) += mAction;	// updates desired position using the action (change in pos?), chosen by simNN ?? - XS
-																	// mrootjointdof p_des is not modified as it represents the position of the whole skeleton?? - XS
-	mDesiredTorque = mCharacter->GetSPDForces(p_des);				// So messing with tau in GetSPDForces changes the desired torque for the muscles to acquire
-																	// not really what we wanted
+	Eigen::VectorXd p_des = mTargetPositions;						// Retrieve target positions of joints
+	p_des.tail(mTargetPositions.rows()-mRootJointDof) += mAction;	// updates desired position using the action (change in pos?)
+																	// mrootjointdof p_des is not modified as it represents the position of the whole skeleton (the pelvis)?? - XS
+	mDesiredTorque = mCharacter->GetSPDForces(p_des);				// retrieve desired torque for muscles to produce
+
 	return mDesiredTorque.tail(mDesiredTorque.rows()-mRootJointDof);
 }
+
+/**
+ * @brief Retrieves the joint torques that result from
+ * the muscle activations 
+ * 
+ * @return Eigen::VectorXd - resultant joint torques from
+ * muscle activations
+ */
 Eigen::VectorXd
 Environment::
 GetMuscleTorques()
@@ -481,9 +506,6 @@ GetReward()
 	skel->setPositions(cur_pos);
 	skel->computeForwardKinematics(true,false,false);
 
-	// The norm of the differences are found. I think the second parameter is a weighting for the value, but I am unsure because
-	// weights are applied when computing the reward on line 410 (w_q, w_v are weights)
-	// These are errors but are added in the reward??
 	/*** compute exp of squared norms ***/
 	// squared norm is multipled by negative weight,
 	// thus, the bigger the difference, the closer to zero
@@ -505,17 +527,18 @@ GetReward()
 	// double r = r_ee*(0.4*w_q*r_q + w_v*r_v);		// rq_0.4
 	
 	// double r = r_ee + w_v*r_v;					// no_rq
-	// double r = r_ee + w_v*r_v;
-	// double r = r_ee;
-	// double r = r_q;
-	// double r = r_v;
-	// double r = r_com;	// problem with r_com -> the firther benjaSIM moves from start pos, the worse it becomes
+	// double r = r_com;	// problem with r_com -> the further benjaSIM moves from start pos, the worse it becomes - XS
 													// Looked back at commit history of MASS and found r_com being used 
 													// They just did not remove it here - ZB
 
 	return r;
 }
 
+/**
+ * @brief Function to calculate the current exo agent reward.
+ * 
+ * @return double representation of the exo agent reward.
+ */
 double 
 Environment::
 GetGaitReward() {

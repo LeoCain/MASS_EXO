@@ -7,6 +7,10 @@
 using namespace dart;
 using namespace dart::dynamics;
 using namespace MASS;
+/**
+ * File for configuration of the musculoskeletal model - XS
+ */
+
 Character::
 Character()
 	:mSkeleton(nullptr),mBVH(nullptr),mTc(Eigen::Isometry3d::Identity())
@@ -14,6 +18,13 @@ Character()
 
 }
 
+/**
+ * @brief Builds the skeleton by loading data from the skeleton
+ * config xml - XS
+ * 
+ * @param path - path to the skeleton config file (example: human.xml)
+ * @param create_obj - ?
+ */
 void
 Character::
 LoadSkeleton(const std::string& path,bool create_obj)
@@ -43,6 +54,13 @@ LoadSkeleton(const std::string& path,bool create_obj)
 	
 	mBVH = new BVH(mSkeleton,bvh_map);
 }
+
+/**
+ * @brief Builds the muscles onto the skeleton by loading
+ * the muscle config file
+ * 
+ * @param path - path to the muscle config file
+ */
 void
 Character::
 LoadMuscles(const std::string& path)
@@ -85,32 +103,14 @@ LoadMuscles(const std::string& path)
 
 }
 
-
-// TODO
-dart::dynamics::SkeletonPtr
-Character::
-LoadExo(const std::string& path)
-{	
-	// load the exo model
-	dart::utils::DartLoader loader;
-    dart::dynamics::SkeletonPtr model = loader.parseSkeleton("/home/medicalrobotics/MASS_EXO/data/exo_model.xml");
-    model->setName("model");
-
-    // Position its base in a reasonable way
-    Eigen::Isometry3d tf = Eigen::Isometry3d::Identity();
-    tf.translation() = Eigen::Vector3d(-0.65, 0.0, 0.0);
-    model->getJoint(0)->setTransformFromParentBodyNode(tf);
-
-    // Get it into a useful configuration
-    model->getDof(1)->setPosition(140.0 * M_PI / 180.0);
-    model->getDof(2)->setPosition(-140.0 * M_PI / 180.0);
-
-	return model;
-	
-}
-
-
-
+/**
+ * @brief Loads the reference motion trajectory
+ * 
+ * @param path - path to the reference motion BVH
+ * @param cyclic - True for cyclic reference motions
+ * such as walking/balancing. False for one-time
+ * motions such as backflipping/kicking
+ */
 void
 Character::
 LoadBVH(const std::string& path,bool cyclic)
@@ -136,10 +136,12 @@ SetPDParameters(double kp, double kv)
 	mKp = Eigen::VectorXd::Constant(dof,kp);	
 	mKv = Eigen::VectorXd::Constant(dof,kv);	
 }
+
 /**
- * @brief: Potentially the function to modify with augmented exo torque?
+ * @brief: Function for computing the desired torques for 
+ * reaching the position targets (?)
  * 
- * @param p_desired: desired positions of joints? of DOFs?
+ * @param p_desired: desired positions of joints
  * @return: Eigen::VectorXd which describes the joint torques (maybe?)
  */
 Eigen::VectorXd
@@ -150,8 +152,7 @@ GetSPDForces(const Eigen::VectorXd& p_desired)
 	Eigen::VectorXd dq = mSkeleton->getVelocities();	// Retrieve the current joint velocities
 	double dt = mSkeleton->getTimeStep();				// Retrieve the size of the time step
 	// Eigen::MatrixXd M_inv = mSkeleton->getInvMassMatrix();
-	Eigen::MatrixXd M_inv = (mSkeleton->getMassMatrix() + Eigen::MatrixXd(dt*mKv.asDiagonal())).inverse();	// mass matrix and something else inverted?
-																											// some form of inertial/momentum adjustment?
+	Eigen::MatrixXd M_inv = (mSkeleton->getMassMatrix() + Eigen::MatrixXd(dt*mKv.asDiagonal())).inverse();
 
 	Eigen::VectorXd qdqdt = q + dq*dt;	// Compute the new position of the joints, assuming constant velocity during this time step.
 
@@ -159,11 +160,7 @@ GetSPDForces(const Eigen::VectorXd& p_desired)
 	Eigen::VectorXd v_diff = -mKv.cwiseProduct(dq);
 	Eigen::VectorXd ddq = M_inv*(-mSkeleton->getCoriolisAndGravityForces()+p_diff+v_diff+mSkeleton->getConstraintForces());	// a = F/M or ddtheta = T/I?
 
-	// Eigen::VectorXd mod = Eigen::VectorXd::Zero(p_diff.size()); // size is 56 = number of DOFs??
-	// // std::cout << "*=====================" << p_diff.size() << "=========================*";
-	// mod << 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000;
 	Eigen::VectorXd tau = p_diff + v_diff - dt*mKv.cwiseProduct(ddq);
-	// Eigen::VectorXd tau = mod;
 
 	tau.head<6>().setZero();
 
