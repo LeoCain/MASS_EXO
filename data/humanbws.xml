@@ -3,7 +3,7 @@
         <Body type="Box" mass="15.0" size="0.2083 0.1454 0.1294" contact="Off" color="0.6 0.6 1.5 1.0" obj="Pelvis.obj">
             <Transformation linear="1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0" translation="0.0 0.9809 0.0 "/>
         </Body>                                          <!--angles?       translations?-->
-        <Joint type="Free" bvh="Character1_Spine" lower="-39.0 -0.1 -0.1 -10.0 -2.0 -10.0" upper="3.0 3.0 3.0 10.0 2.0 10.0" springStiff="0.0 0.0 0.0 0.0 0.0 0.0">
+        <Joint type="Free" bvh="Character1_Spine" lower="-3.0 -0.1 -0.1 -10.0 -2.0 -10.0" upper="3.0 3.0 3.0 10.0 2.0 10.0" springStiff="0.0 0.0 0.0 0.0 0.0 0.0">
             <Transformation linear="1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0" translation="0.0 0.9809 0.0"/>
         </Joint>
     </Node>

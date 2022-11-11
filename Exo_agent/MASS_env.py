@@ -1,7 +1,7 @@
 # Ensure we can still import pymss and Model
 import sys
-sys.path.append("/home/medicalrobotics/MASS_EXO/python")
-sys.path.append("/home/medicalrobotics/MASS_EXO")
+sys.path.append("/home/medrobotics/MASSExo/MASSMerge/MASS_EXO/python")
+sys.path.append("/home/medrobotics/MASSExo/MASSMerge/MASS_EXO")
 # DRL-related imports:
 from traceback import print_tb
 import torch
@@ -10,7 +10,6 @@ import torch.optim as optim
 import torch.nn.functional as F
 import torchvision.transforms as T
 import Model
-from torchsummary import summary
 from ray.rllib.env.env_context import EnvContext
 # Standard mathmatical libraries
 import numpy as np
