@@ -15,11 +15,11 @@ include_directories(${DART_INCLUDE_DIRS})
 include_directories(${OPENGL_INCLUDE_DIR})
 include_directories(${GLUT_INCLUDE_DIR})
 include_directories(${PYTHON_INCLUDE_DIR})
-include_directories(/home/medicalrobotics/MASS_EXO/render)
+include_directories(/home/medrobotics/MASSExo/MASSMerge/MASS_EXO/render)
 
 file(GLOB srcs "*.h" "*.cpp"
-    "/home/medicalrobotics/MASS_EXO/render/Window.h"
-    "/home/medicalrobotics/MASS_EXO/render/Window.cpp"
+    "${CMAKE_HOME_DIRECTORY}/render/Window.h"
+    "${CMAKE_HOME_DIRECTORY}/render/Window.cpp"
 )
 add_executable(exo_render ${srcs})
 target_link_libraries(exo_render ${DART_LIBRARIES} ${PYTHON_LIBRARIES} GL GLU glut mss pybind11::module pybind11::embed)

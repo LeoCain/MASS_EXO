@@ -35,6 +35,7 @@ Window(Environment* env)
 	py::str module_dir = (std::string(MASS_ROOT_DIR)+"/python").c_str();
 	sys_module.attr("path").attr("insert")(1, module_dir);
 	py::str module_dir2 = (std::string(MASS_ROOT_DIR)+"/Exo_agent").c_str();
+	std::cout << MASS_ROOT_DIR << std::endl;
     sys_module.attr("path").attr("insert")(1, module_dir2);
 
 	/** Execute relevant imports **/
@@ -179,13 +180,14 @@ void
 Window::
 define_muscle_groups()
 {
-	// L Hip Flexion
+	// L Hip Flexion DONE
 	muscle_groups[LHFlex].group = {
 		"L_Rectus_Femoris", "L_Rectus_Femoris1", "L_iliacus", "L_iliacus1",
 		"L_iliacus2", "L_Psoas_Major", "L_Psoas_Major1", "L_Psoas_Major2", 
-		"L_Psoas_Minor", "L_Sartorius"
+		"L_Psoas_Minor", 
+		"L_Sartorius"
 		};
-	// L Hip Extension
+	// L Hip Extension DONE
 	muscle_groups[LHExt].group = {
 		"L_Gluteus_Maximus", "L_Gluteus_Maximus1", "L_Gluteus_Maximus2", 
 		"L_Gluteus_Maximus3", "L_Gluteus_Maximus4", "L_Adductor_Magnus", 
@@ -193,35 +195,35 @@ define_muscle_groups()
 		"L_Adductor_Magnus4", "L_Bicep_Femoris_Longus", "L_Semitendinosus",
 		"L_Semimembranosus", "L_Semimembranosus1"
 	};
-	// L Hip Abduction
+	// L Hip Abduction DONE
 	muscle_groups[LHAbd].group = {
 		"L_Gluteus_Medius", "L_Gluteus_Medius1", "L_Gluteus_Medius2", 
 		"L_Gluteus_Medius3", "L_Gluteus_Minimus", "L_Gluteus_Minimus1", 
 		"L_Gluteus_Minimus2", "L_Tensor_Fascia_Lata", "L_Tensor_Fascia_Lata1", 
 		"L_Tensor_Fascia_Lata2"
 	};
-	// L Hip Adduction
+	// L Hip Adduction DONE
 	muscle_groups[LHAdd].group = {
 		"L_Pectineus", "L_Adductor_Longus", "L_Adductor_Longus1",
 		"L_Gracilis", "L_Adductor_Brevis", "L_Adductor_Brevis1",
 		"L_Adductor_Magnus", "L_Adductor_Magnus1", "L_Adductor_Magnus2",
 		"L_Adductor_Magnus3", "L_Adductor_Magnus4"
 	};
-	// L Hip External rotation
+	// L Hip External rotation DONE
 	muscle_groups[LHExtRot].group = {
 		"L_Gluteus_Maximus", "L_Gluteus_Maximus1", "L_Gluteus_Maximus2", 
 		"L_Gluteus_Maximus3", "L_Gluteus_Maximus4", "L_Piriformis", 
 		"L_Piriformis1", "L_Quadratus_Femoris", "L_Obturator_Externus",
 		 "L_Obturator_Internus", "L_Superior_Gemellus", "L_Inferior_Gemellus"
 	};
-	// L hip Internal rotation
+	// L hip Internal rotation DONE
 	muscle_groups[LHIntRot].group = { //SUS - exact same muscles as abductor grp
 		"L_Gluteus_Medius", "L_Gluteus_Medius1", "L_Gluteus_Medius2", 
 		"L_Gluteus_Medius3", "L_Gluteus_Minimus", "L_Gluteus_Minimus1", 
 		"L_Gluteus_Minimus2", "L_Tensor_Fascia_Lata", "L_Tensor_Fascia_Lata1", 
 		"L_Tensor_Fascia_Lata2"
 	};
-	// L Knee Flexion
+	// L Knee Flexion 
 	muscle_groups[LKFlex].group = {
 		"L_Semimembranosus", "L_Semimembranosus1", "L_Semitendinosus",
 		"L_Bicep_Femoris_Longus", "L_Bicep_Femoris_Short", "L_Bicep_Femoris_Short1",
@@ -239,7 +241,8 @@ define_muscle_groups()
 	muscle_groups[RHFlex].group = {
 		"R_Rectus_Femoris", "R_Rectus_Femoris1", "R_iliacus", "R_iliacus1",
 		"R_iliacus2", "R_Psoas_Major", "R_Psoas_Major1", "R_Psoas_Major2", 
-		"R_Psoas_Minor", "R_Sartorius"
+		"R_Psoas_Minor",
+		 "R_Sartorius"
 	};
 	// R Hip Extension
 	muscle_groups[RHExt].group = {
