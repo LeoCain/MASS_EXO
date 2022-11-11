@@ -24,7 +24,7 @@ class Plotter():
         # Actual:
         self.l_hip_angle = []; self.l_knee_angle = []
         self.r_hip_angle = []; self.r_knee_angle = []
-        # Desired: TODO: update desired angles
+        # Desired:
         self.d_l_hip_angle = []; self.d_l_knee_angle = []
         self.d_r_hip_angle = []; self.d_r_knee_angle = []
 
@@ -43,7 +43,8 @@ class Plotter():
         self.gait_phase = []
 
         ### plotter state variables ###
-        self.stop = False
+        self.plot_size = 8  # how long to record data for (seconds)
+        self.stop = False   # set to true after self.plot_size seconds
         self.plotted = False
 
     def Update_Torques(self, exo_torques):
@@ -120,7 +121,7 @@ class Plotter():
         # Compute current phase as number of wraps + gait_phase
         # print(f"Summed phase: {curr_phase}, phase: {phase}")
         curr_phase = self.num_wraparounds + phase
-        self.stop = (curr_phase >= 8)
+        self.stop = (curr_phase >= self.plot_size)
         self.gait_phase.append(curr_phase)
 
     def Update_All_Exo(self, exo_torques, joint_angles_act, 
@@ -137,9 +138,11 @@ class Plotter():
                 [L hip, L knee, R hip, R knee]
         :param activations: list of muscle group activations in the order:
             {LHFlex,LHExt,LHAbd,LHAdd,LHExtRot,LHIntRot,LKFlex,LKExt,
-            RHFlex,RHExt,RHAbd,RHAdd,RHExtRot,RHIntRot,RKFlex,RKExt,} 
+            RHFlex,RHExt,RHAbd,RHAdd,RHExtRot,RHIntRot,RKFlex,RKExt} 
         :param phase: current progression through the gait phase
         """
+        # Plotter plots for the first self.plot_size seconds. after this time, stop
+        # is set to True
         if not self.stop:
             self.Update_Gait_Phase(phase)
             self.Update_Torques(exo_torques)
@@ -162,6 +165,8 @@ class Plotter():
             RHFlex,RHExt,RHAbd,RHAdd,RHExtRot,RHIntRot,RKFlex,RKExt,} 
         :param phase: current progression through the gait phase
         """
+        # Plotter plots for the first self.plot_size seconds. after this time, stop
+        # is set to True
         if not self.stop:
             self.Update_Gait_Phase(phase)
             self.Update_Angles(joint_angles_act, joint_angles_ref)
@@ -271,15 +276,14 @@ class Plotter():
         mae = np.mean(np.abs(target - actual))
         return mae
 
-
     def Plot_Select(self, mode: str, fname: str):
         """
         Uses the Plot_Info_Vertical function to plot an aspect
         which is indicated by the string input:
         "Torque": Joint torque plot
         "Angle": Joint angle plot
-        "Angle Comp": TODO
-        "Knee activation: knee activation plot
+        "Angle Comp": comparison of reference and actual hip/knee trajectories
+        "Knee activation": knee activation plot
         "hip flex ext activation"
         "hip add abd activation"
         "hip int ext rot activation"

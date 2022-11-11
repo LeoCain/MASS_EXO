@@ -8,6 +8,9 @@ import time
 from collections import OrderedDict
 import numpy as np
 from IPython import embed
+"""
+File containing the MASS agent models.
+"""
 
 MultiVariateNormal = torch.distributions.Normal
 temp = MultiVariateNormal.log_prob

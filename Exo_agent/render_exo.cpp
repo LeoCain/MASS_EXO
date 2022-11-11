@@ -46,7 +46,7 @@ exo_Window(Environment* env, const std::string& nn_path, const std::string& musc
 
 /**
  * @brief Same as the MASS::Window step function, but incorperates
- *          Exo torques by calling exo net and applying the output
+ * Exo torques by calling exo net and applying the output
  */
 void
 exo_Window::
@@ -70,7 +70,7 @@ Step()
 	{
 		int inference_per_sim = 2;
 		for(int i=0;i<num;i+=inference_per_sim){
-			Eigen::VectorXd mt = mEnv->GetMuscleTorques();		// Muscle torques can be ??
+			Eigen::VectorXd mt = mEnv->GetMuscleTorques();		
 			mEnv->SetActivationLevels(GetActivationFromNN(mt));
 			for(int j=0;j<inference_per_sim;j++)
 				mEnv->Step();
@@ -100,17 +100,12 @@ GetExoTorquesFromNN()
 
 /**
  * @brief records applied exo torques, benjaSIM joint angles, benjaSIM muscle group activation,
- * 			and sends to python script to be graphed
- * 
- * @param exo_torques vector of applied exo torques
+ * and sends to python script to be graphed
  */
 void
 exo_Window::
 record_data()
 {
-	/** Load applied exo torques to be sent to plotter **/
-	//just call mEnv->GetExoTorques()
-
 	/** Read and save benjaSIM activations, group into:
 	 * Hip flexion/extension groups
 	 * Hip abduction/adduction groups
@@ -151,8 +146,7 @@ record_data()
 	}
 
 	/** Read and save benjaSIM hip/knee joint angles **/
-	// mEnv->GetCharacter()->GetSkeleton()->getBodyNode("FemurL")->getParentJoint()->get
-	// dummy angle vector so code works
+	// dummy angle vector for initialisation
 	Eigen::VectorXd joint_angles_act(4);
 	Eigen::VectorXd joint_angles_ref(4);
 	// Actual positions
@@ -160,7 +154,7 @@ record_data()
 	double r_hip_act = mEnv->GetCharacter()->GetSkeleton()->getBodyNode("FemurR")->getParentJoint()->getPositions()[0];
 	double l_knee_act = mEnv->GetCharacter()->GetSkeleton()->getBodyNode("TibiaL")->getParentJoint()->getPositions()[0];
 	double r_knee_act = mEnv->GetCharacter()->GetSkeleton()->getBodyNode("TibiaR")->getParentJoint()->getPositions()[0];
-	//Reference positions
+	// Reference positions
 	auto l_hip_joint_idx = mEnv->GetCharacter()->GetSkeleton()->getBodyNode("FemurL")->getParentJoint()->getIndexInSkeleton(0);
 	auto r_hip_joint_idx = mEnv->GetCharacter()->GetSkeleton()->getBodyNode("FemurR")->getParentJoint()->getIndexInSkeleton(0);
 	auto l_knee_joint_idx = mEnv->GetCharacter()->GetSkeleton()->getBodyNode("TibiaL")->getParentJoint()->getIndexInSkeleton(0);
@@ -173,7 +167,7 @@ record_data()
 	joint_angles_act << l_hip_act, l_knee_act, r_hip_act, r_knee_act;
 	joint_angles_ref << l_hip_ref, l_knee_ref, r_hip_ref, r_knee_ref;
 
-	/** Send angles, torques, activations to python for plotting **/
+	/** Send (torques, angles, activations, gait ref) to python for plotting **/
 	py::object Update_All_Exo = plotter.attr("Update_All_Exo");
     Update_All_Exo(mEnv->GetExoTorques(), joint_angles_act, joint_angles_ref,
 					avg_activations, mEnv->GetState().tail(1));

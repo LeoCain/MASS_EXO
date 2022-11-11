@@ -1,3 +1,7 @@
+"""
+I just used this to test random bits of code in isolation
+"""
+
 import matplotlib.pyplot as plt
 import os
 import numpy as np

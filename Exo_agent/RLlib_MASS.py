@@ -1,7 +1,7 @@
 # Ensure we can still import pymss and Model
 import sys
 from tabnanny import verbose
-sys.path.append("/home/medicalrobotics/MASS_EXO/python")
+sys.path.append("/home/medicalrobotics/MASS_EXO/python") # device specific path (sorry)
 # Environment building:
 import gym
 import pymss    # access to c++ libraries (envmanager.cpp)
@@ -48,20 +48,21 @@ class Exo_Trainer():
 
         ### Create directory for saving RLlib policy ###
         self.policy_path = "{}/policies/".format(os.path.dirname(__file__)) # Define folder path
-
         if not(os.path.isdir(self.policy_path)):
             os.mkdir(self.policy_path)
 
-        ### setup learning rate scheduler ###
-        # lr_schedule = PolynomialSchedule()
-
         ### Initialise the environment, agent, tuner, network ###
+        # register custom env and NN
         ModelCatalog.register_custom_model("Actor_NN", Actor_NN)
         register_env("MASS_env", MASS_env)
+        # set MASS nns and metadata file - # device specific paths (sorry)
         self.metafile_path = "/home/medicalrobotics/MASS_EXO/data/metadata_crip.txt"
         self.sim_NN_path = "/home/medicalrobotics/MASS_EXO/nn_knee_weak_rq/max.pt"
         self.muscle_NN_path = "/home/medicalrobotics/MASS_EXO/nn_knee_weak_rq/max_muscle.pt"
         if mode == 'tune':
+            # tunes hyperparameters - not rigorously tested, but should only be used
+            # once reward function and simulation are good and getting decent results.
+            # i.e. the actor should work - the tuner is just for further optimisation
             self.tuner = self.Initialise_Tuner()
         elif mode == 'train':
             self.config = {
@@ -109,8 +110,6 @@ class Exo_Trainer():
         self.mean_rewards = []
         self.epochs = 0
 
-        ### initialise ray? ###
-
     def Initialise_Tuner(self):
         """
         Sets up the tuner config: Defines hyperparameter space to tune,
@@ -123,9 +122,9 @@ class Exo_Trainer():
             
             perturbation_interval=100,   # how often to re-consider chosen params
             quantile_fraction=0.25,     # probability of copying good params to runs with bad params
-            # resample_probability=0.25,
-            # Specifies the mutations of these hyperparams
-            hyperparam_bounds={  # SGD Momentum?
+            
+            hyperparam_bounds={  # Specifies bounds to search for best hyperparams within
+                # SGD Momentum?
                 # "lambda": [0.9, 0.95, 1.0],
                 "lr": [1e-3, 1e-5],
                 # "momentum":
@@ -135,7 +134,8 @@ class Exo_Trainer():
             },
         )
 
-        tuner = tune.Tuner( # stop case for tuning, 
+        tuner = tune.Tuner(
+            # might need to add stop case for tuning
             "PPO",
             tune_config=tune.TuneConfig(
                 metric="episode_reward_mean",
@@ -173,7 +173,7 @@ class Exo_Trainer():
 
     def Tune_Params(self):
         """
-        Tunes the specified hyperparameters
+        Tunes the specified hyperparameters. Then plots the process.
         """
         results = self.tuner.fit()
 
@@ -203,6 +203,7 @@ class Exo_Trainer():
             chkpt_file = self.agent.save(self.policy_path)
             self.epochs += 1
             self.plot_reward(result["episode_reward_min"], result["episode_reward_mean"], result["episode_reward_max"])
+            # agent is stopped and reloaded every 25 epochs because RLlib rollout workers have a memory leak (as of 2022)
             if n%25==0 and not n==0:
                 print("========stopping...===========")
                 self.agent.stop()
@@ -229,9 +230,10 @@ class Exo_Trainer():
     
     def get_action(self, state):
         """
-        Retrieves the action for the given state, by using the restored agent
+        Retrieves the action for the given state, by using the restored agent.
+        used mostly when it is called by render_exo.cpp
         """
-        return self.agent.compute_single_action(state) # right format for c++?
+        return self.agent.compute_single_action(state)
     
     def plot_reward(self, min, mean, max):
         """
@@ -250,7 +252,7 @@ class Exo_Trainer():
         plt.xlabel("Number of Epochs")
         plt.ylabel("Reward")
         plt.legend(loc='upper left')
-        plt.savefig("/home/medicalrobotics/MASS_EXO/Exo_agent/Plots/RewardPlot_torch.png")
+        plt.savefig("/home/medicalrobotics/MASS_EXO/Exo_agent/Plots/RewardPlot_torch.png")  # device specific path (sorry)
 
 
 def debug():

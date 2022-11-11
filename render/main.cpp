@@ -7,16 +7,16 @@
 #include <signal.h>
 
 MASS::Window* window;
-
-void SIGINT_handler(sig_atomic_t s){
-	std::cout << "\nSIGINT caught: Saving data, Finalising plots...";
-	window->Plot_And_Save();
-	exit(1); 
-}
+//catches cntrl-C and graphs data -> depreciated
+// void SIGINT_handler(sig_atomic_t s){
+// 	std::cout << "\nSIGINT caught: Saving data, Finalising plots...";
+// 	window->Plot_And_Save();
+// 	exit(1); 
+// }
 
 int main(int argc,char** argv)
 {
-	signal (SIGINT,SIGINT_handler);
+	// signal (SIGINT,SIGINT_handler); //catches cntrl-C and graphs data -> depreciated
 
 	MASS::Environment* env = new MASS::Environment();
 
@@ -49,6 +49,7 @@ int main(int argc,char** argv)
 	glutInit(&argc, argv);
 
 	// MASS::Window* window;
+	// check if commandline args are correct:
 	if(argc == 2)
 	{
 		window = new MASS::Window(env);
@@ -80,6 +81,7 @@ int main(int argc,char** argv)
 	// else if (argc==3)
 	// 	window = new MASS::Window(env,argv[1],argv[2]);
 	
+	// begin simulation
 	window->initWindow(1920,1080,"gui");
 	glutMainLoop();
 }

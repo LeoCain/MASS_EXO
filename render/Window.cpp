@@ -1,5 +1,6 @@
 /**
- * This file seems to handle loading and application of the trained neural nets, by executing python code from C++
+ * This file handles loading and application of the trained neural nets, by executing python code from C++
+ * it also renders the environemtn visually.
  */
 \
 #include "Window.h"
@@ -412,7 +413,6 @@ SetFocusing()
 		
 	}
 }
-
 
 /**
  * @brief Retrieve the optimal action from the sim NN by passing the current state to it - XS

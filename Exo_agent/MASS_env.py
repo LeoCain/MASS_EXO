@@ -1,7 +1,7 @@
 # Ensure we can still import pymss and Model
 import sys
-sys.path.append("/home/medicalrobotics/MASS_EXO/python")
-sys.path.append("/home/medicalrobotics/MASS_EXO")
+sys.path.append("/home/medicalrobotics/MASS_EXO/python")    # needs to be changed to work on any devices
+sys.path.append("/home/medicalrobotics/MASS_EXO")   # needs to be changed to work on any devices
 # DRL-related imports:
 from traceback import print_tb
 import torch
@@ -34,14 +34,12 @@ class MASS_env(Env):
         Initial State
         Episode Length
         """
-        # print("==================if you can see me I'M ALIVE==============")
         ### Setup env via EnvManager.cpp file ###
         meta_file = config["meta_file"]
         sim_NN = config["sim_NN"]
         muscle_NN = config["muscle_NN"]
         self.num_env_threads = 1
         self.sim_env = pymss.pymss(meta_file,self.num_env_threads)
-        # Keep track of number of resets (= to num episodes)
 
         ### Setting Up Action Space ###
         max_T = 80  # Maximum possible joint torque, Nm
@@ -58,8 +56,7 @@ class MASS_env(Env):
 
         ### Setting Up Observation Space ###
         # (actual motion, gait stage)
-        # == ((pos_links_COM<x,y,z>, vel_links_COM<x,y,z>, gait_cycle_progress))
-        # angle_dims = self.sim_env.GetLegJointAngles()[0].size
+        # == (pos_links_COM<x,y,z>, vel_links_COM<x,y,z>, gait_cycle_progress)
         state_dims = self.sim_env.GetNumState() # Dimension of the human model state description (pos, vel, gait stage) 
         obs_low_limit = np.full(state_dims, -1000.0)
         obs_high_limit = np.full(state_dims, 1000.0)
@@ -101,14 +98,6 @@ class MASS_env(Env):
         :param action: The action to apply, as defined by the action space
         :return: (resultant state, resultant reward, whether game is now terminal or not, some info[not used])
         """
-        # if self.num_eps >= 75:
-        #     if self.num_eps == 75:
-        #         print("============= Switched =============")
-        #     apply_action = True
-
-        # else:
-        #     apply_action = False
-
         ### Apply action to environment (actuate exo) ###
         T_LHip, T_LKnee, T_RHip, T_RKnee = action
         self.set_joint_torques(T_LHip, T_LKnee, T_RHip, T_RKnee)
@@ -170,8 +159,8 @@ class MASS_env(Env):
         """
         Visually renders the state
         """
-        # TODO: The plan is to make another .so file, with the contents of window.cpp
-        # Then I will try calling window.draw() here  
+        # for this to work, you would need to use pybind11
+        # to make the render file accessible from python.
 
     def reset(self):
         """
@@ -213,8 +202,6 @@ class MASS_env(Env):
 
         ### load activations from muscleNN and apply to env ###
         inference_per_sim = 2
-        
-        # mt = self.Tensor(self.sim_env.GetMuscleTorques())
         for i in range(num_steps_per_cntrl//inference_per_sim):
             mt = self.Tensor(self.sim_env.GetMuscleTorques())
             dt = self.Tensor(self.sim_env.GetDesiredTorques())
@@ -265,7 +252,8 @@ class MASS_env(Env):
         """
         Live plots the agent's performance as according to the
         original reward so that it can be compared to benjaSIM 
-        training runs.
+        training runs. Currently doesn't really work because
+        each thread updates the same plot.
         """
         ### average every group of 50 episode rewards ###
         avg_r = []
@@ -292,7 +280,7 @@ def debug_test():
     """
     Function purely for debugging and checking that the env is working as desired
     """
-    env = MASS_env({
+    env = MASS_env({    # device specific filepaths (sorry)
         "meta_file":"/home/medicalrobotics/MASS_EXO/data/metadata.txt",
         "sim_NN":"/home/medicalrobotics/MASS_EXO/nn_norm/max.pt",
         "muscle_NN":"/home/medicalrobotics/MASS_EXO/nn_norm/max_muscle.pt",

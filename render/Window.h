@@ -61,7 +61,7 @@ public:
 	bool mMuscleNNLoaded;
 	Eigen::Affine3d mViewMatrix;
 
-	//muscle groups for plotting activation
+	/** muscle groups for plotting activation **/
     enum MuscleGroupIndex {
         LHFlex,
         LHExt,
@@ -99,6 +99,5 @@ public:
     std::array<MuscleGroup, MuscleGroupIndex::TOTAL> muscle_groups;
 };
 };
-
 
 #endif

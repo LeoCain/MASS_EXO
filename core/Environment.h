@@ -59,7 +59,6 @@ public:
 
 	// Added by XS:
 	Eigen::VectorXd GetExoTorques();
-	Eigen::VectorXd GetLegJointAngles();
 	double GetGaitReward();
 
 	// Setters and getters for the hip/knee joint torque vectors:

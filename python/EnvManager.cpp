@@ -2,6 +2,14 @@
 #include "DARTHelper.h"
 #include <omp.h>
 
+/**
+ * This file contains all the C++ functions that have been ported to 
+ * python via pybind. most of them are just call functions from
+ * environment.cpp. when you see calls to pymss in python,
+ * this file is being called. i.e. it enables you to setup and
+ * interact with the MASS environment from python
+ */
+
 EnvManager::
 EnvManager(std::string meta_file,int num_envs)
 	:mNumEnvs(num_envs)
@@ -67,12 +75,6 @@ Step(int id)
 {
 	mEnvs[id]->Step();
 }
-// void
-// EnvManager::
-// BenStep()
-// {
-// 	win->Step();
-// }
 void
 EnvManager::
 Reset(bool RSI,int id)
@@ -147,17 +149,6 @@ GetStates()
 	}
 
 	return mStates;
-}
-const Eigen::MatrixXd&
-EnvManager::
-GetLegJointAngles()
-{
-	for (int id = 0;id<mNumEnvs;++id)
-	{
-		mAngles.row(id) = mEnvs[id]->GetLegJointAngles().transpose();
-	}
-
-	return mAngles;
 }
 void
 EnvManager::

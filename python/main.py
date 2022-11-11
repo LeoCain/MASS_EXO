@@ -19,6 +19,9 @@ import torchvision.transforms as T
 import numpy as np
 import pymss	# A compiled file of all the EnvManager file
 from Model import *
+"""
+File used for training the MASS agent
+"""
 
 # Set tensors based on whether GPU with cuda is available
 use_cuda = torch.cuda.is_available()
