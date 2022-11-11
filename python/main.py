@@ -398,7 +398,6 @@ def Plot(y,title,num_fig=1,ylim=True):
 		plt.ylim([0,1])
 	plt.pause(0.001)
 	plt.savefig('../png/Reward_Graph.png')
-	plt.close()
 
 import argparse
 import os
