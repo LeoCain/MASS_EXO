@@ -208,7 +208,10 @@ Step()
 			muscle->Update();
 			muscle->ApplyForceToBody();
 		}
+		Eigen::VectorXd holdUp = Eigen::VectorXd::Zero(6);
+		holdUp << 0, 0, 0, 0, 255, 0;
 		// TODO1: Verify that setForces does set TORQUE when called on joints (XS)
+		mCharacter->GetSkeleton()->getBodyNode("Pelvis")->getParentJoint()->setForces(holdUp);
 		Eigen::Vector3d T_LHip{GetLHipT(), 0, 0};
 		Eigen::Vector3d T_RHip{GetRHipT(), 0, 0};
 		Eigen::VectorXd T_RKnee = Eigen::VectorXd::Zero(1);
