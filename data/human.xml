@@ -1,4 +1,5 @@
 <Skeleton name="Human">
+    <!--File parsed in DARTHELPER.cpp to create skeleton joint structure-->
     <Node name="Pelvis" parent="None" >
         <Body type="Box" mass="15.0" size="0.2083 0.1454 0.1294" contact="Off" color="0.6 0.6 1.5 1.0" obj="Pelvis.obj">
             <Transformation linear="1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0" translation="0.0 0.9809 -0.0308 "/>
