@@ -1,4 +1,5 @@
 <Muscle>
+    <!--File used to create muscles on model-->
     <Unit name="L_Abductor_Pollicis_Longus" f0="1000.000000" lm="1.200000" lt="0.200000" pen_angle="0.000000" lmax="-0.100000">
         <Waypoint body="ForeArmL" p="0.629400 1.471000 -0.014000 " />
         <Waypoint body="ForeArmL" p="0.732300 1.488400 0.018000 " />
