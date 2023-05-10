@@ -21,7 +21,7 @@ exo_Window(Environment* env, const std::string& nn_path, const std::string& musc
 	mm = py::module::import("__main__");
 	mns = mm.attr("__dict__");
 	sys_module = py::module::import("sys");
-	py::str module_dir = (std::string(MASS_ROOT_DIR)+"/Exo_agent").c_str();
+	py::str module_dir = "/home/medicalrobotics/Anton/MASS_EXO/Exo_agent";
     sys_module.attr("path").attr("insert")(1, module_dir);
 
 	/** Execute relevant imports **/

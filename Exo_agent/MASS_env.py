@@ -1,7 +1,7 @@
 # Ensure we can still import pymss and Model
 import sys
-sys.path.append("/home/medrobotics/MASSExo/MASSMerge/MASS_EXO/python")
-sys.path.append("/home/medrobotics/MASSExo/MASSMerge/MASS_EXO")
+sys.path.append("/home/medicalrobotics/Anton/MASS_EXO/python")
+sys.path.append("/home/medicalrobotics/Anton/MASS_EXO")
 # DRL-related imports:
 from traceback import print_tb
 import torch

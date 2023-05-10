@@ -1,7 +1,7 @@
 # Ensure we can still import pymss and Model
 import sys
 from tabnanny import verbose
-sys.path.append("/home/medrobotics/MASSExo/MASSMerge/MASS_EXO/python")
+sys.path.append("/home/medicalrobotics/Anton/MASS_EXO/python")
 # Environment building:
 import gym
 import pymss    # access to c++ libraries (envmanager.cpp)
@@ -55,9 +55,9 @@ class Exo_Trainer():
         # register custom env and NN
         ModelCatalog.register_custom_model("Actor_NN", Actor_NN)
         register_env("MASS_env", MASS_env)
-        self.metafile_path = "/home/medrobotics/MASSExo/MASSMerge/MASS_EXO/data/metadata_bws.txt"
-        self.sim_NN_path = "/home/medrobotics/MASSExo/MASSMerge/MASS_EXO/nn/max.pt"
-        self.muscle_NN_path = "/home/medrobotics/MASSExo/MASSMerge/MASS_EXO/nn/max_muscle.pt"
+        self.metafile_path = "/home/medicalrobotics/Anton/MASS_EXO/data/metadatabws.txt"
+        self.sim_NN_path = "/home/medicalrobotics/Anton/MASS_EXO/nn/max.pt"
+        self.muscle_NN_path = "/home/medicalrobotics/Anton/MASS_EXO/nn/max_muscle.pt"
         if mode == 'tune':
             # tunes hyperparameters - not rigorously tested, but should only be used
             # once reward function and simulation are good and getting decent results.
@@ -251,7 +251,7 @@ class Exo_Trainer():
         plt.xlabel("Number of Epochs")
         plt.ylabel("Reward")
         plt.legend(loc='upper left')
-        plt.savefig("/home/medrobotics/MASSExo/MASSMerge/MASS_EXO/Exo_agent/Plots/RewardPlot_torch.png")
+        plt.savefig("/home/medicalrobotics/Anton/MASS_EXO/Exo_agent/Plots/RewardPlot_torch.png")
 
 
 def debug():
