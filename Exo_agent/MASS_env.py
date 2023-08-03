@@ -137,7 +137,8 @@ class MASS_env(Env):
         traj_r = self.sim_env.GetRewards()[0]
         
         ### Define Full reward ###
-        reward = 0.1*traj_r + 0.3*leg_traj_r + 0.25*r_T_map + 0.35*r_dT_map
+        # reward = 0.1*traj_r + 0.3*leg_traj_r + 0.25*r_T_map + 0.35*r_dT_map
+        reward = 0.1*traj_r + 0.3*leg_traj_r + 0.35*r_dT_map
        
         # original benjaSIM reward
         self.orig_r += traj_r

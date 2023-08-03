@@ -464,8 +464,8 @@ GetReward()
 	Eigen::VectorXd v_diff_all = skel->getPositionDifferences(mTargetVelocities,cur_vel);	// Compute the difference between actual and target joint velocities
 	
 	// Make zero vectors of size equal to the number of DOFs. One for position difference, one for velocity difference:
-	Eigen::VectorXd p_diff = Eigen::VectorXd::Zero(skel->getNumDofs());
-	Eigen::VectorXd v_diff = Eigen::VectorXd::Zero(skel->getNumDofs());
+	Eigen::VectorXd p_diff = Eigen::VectorXd::Zero(skel->getNumDofs()); // Difference between target and actual position
+	Eigen::VectorXd v_diff = Eigen::VectorXd::Zero(skel->getNumDofs());// Difference between target and actual Velocity
 
 	const auto& bvh_map = mCharacter->GetBVH()->GetBVHMap();	// ????
 

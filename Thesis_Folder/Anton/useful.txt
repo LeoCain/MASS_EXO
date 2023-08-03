@@ -1,0 +1,14 @@
+Train Skeleton (Body Weight Support):
+python3 main.py -d ../data/metadata_bws.txt
+
+Run Skeleton (Body Weight Support):
+cd build
+./render/render ../data/metadata_bws.txt ../nn/max.pt ../nn/max_muscle.pt
+
+Train Exo (Body Weight Support):
+cd MASS_EXO
+python3 Exo_agent/RLlib_MASS.py
+
+Run exo (Body Weight Support): 
+cd build
+./Exo_agent/exo_render ../data/metadata_bws.txt ../nn/max.pt ../nn/max_muscle.pt ../Exo_agent/policies/checkpoint_002000
