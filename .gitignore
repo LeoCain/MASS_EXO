@@ -11,3 +11,4 @@ nn_knee_0.4rq/
 Exo_agent/policies/
 Exo_agent/policies_torch/
 Exo_agent/ray_tune_results/
+core/libmss.a
