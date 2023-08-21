@@ -55,7 +55,7 @@ class Exo_Trainer():
         # register custom env and NN
         ModelCatalog.register_custom_model("Actor_NN", Actor_NN)
         register_env("MASS_env", MASS_env)
-        self.metafile_path = "/home/medicalrobotics/Anton/MASS_EXO/data/metadata_bws.txt"
+        self.metafile_path = "/home/medicalrobotics/Anton/MASS_EXO/data/metadata_bws_crip_knee_hip.txt"
         self.sim_NN_path = "/home/medicalrobotics/Anton/MASS_EXO/nn/max.pt"
         self.muscle_NN_path = "/home/medicalrobotics/Anton/MASS_EXO/nn/max_muscle.pt"
         if mode == 'tune':
