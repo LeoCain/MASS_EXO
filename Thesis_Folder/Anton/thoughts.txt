@@ -9,7 +9,7 @@ Same as attempt 1 but with the impaired bws model
 muscled activations appear even more choppy, torque actor also appears to be overcompensating (leg swinging wildly)
 possible Issues: skeleton legs are not resisted by exoskeleton structure, this might be causing the torque actor to 
 overcompensate the leg to swing around into a position with a high reward. muscles nn is more than likely actively 
-resisting the torque actor. 
+resisting the torque actor.
 
 - constrain legs
 - rerun sim
