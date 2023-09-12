@@ -55,7 +55,7 @@ class Exo_Trainer():
         # register custom env and NN
         ModelCatalog.register_custom_model("Actor_NN", Actor_NN)
         register_env("MASS_env", MASS_env)
-        self.metafile_path = "/home/medicalrobotics/Anton/MASS_EXO/data/metadata_bws_crip_knee_hip.txt"
+        self.metafile_path = "/home/medicalrobotics/Anton/MASS_EXO/data/metadata_bws_crip_knee_hip_EXO.txt"
         self.sim_NN_path = "/home/medicalrobotics/Anton/MASS_EXO/nn/max.pt"
         self.muscle_NN_path = "/home/medicalrobotics/Anton/MASS_EXO/nn/max_muscle.pt"
         self.restore = restore_agent
@@ -66,6 +66,7 @@ class Exo_Trainer():
         self.mean_rewards = []
         self.epochs = 0
         self.checkpoint_path = ""
+        self.plot_start = 1
 
         if mode == 'tune':
             # tunes hyperparameters - not rigorously tested, but should only be used
@@ -80,6 +81,8 @@ class Exo_Trainer():
 
                 self.checkpoint_path = checkpoint_path
                 self.epochs = int(checkpoint_number)
+                self.plot_start = self.epochs + 1
+
                 
             self.config = {
                 "env": MASS_env,
@@ -269,7 +272,7 @@ class Exo_Trainer():
         self.max_rewards.append(max)
         self.mean_rewards.append(mean)
 
-        epoch_space = np.linspace(self.epochs, self.epochs, len(self.min_rewards))
+        epoch_space = np.linspace(self.plot_start, self.epochs, len(self.min_rewards))
 
         
 
@@ -286,7 +289,8 @@ class Exo_Trainer():
 
 
 def debug():
-    ben = Exo_Trainer('train', restore_agent=True)
+    ben = Exo_Trainer('train')
+    # ben = Exo_Trainer('train', restore_agent=True)
     # ben.Tune_Params()
     ben.Train_Exo(10000)
     # ben.Restore_Agent("/home/medicalrobotics/Anton/MASS_EXO/Exo_agent/policies/checkpoint_005000")

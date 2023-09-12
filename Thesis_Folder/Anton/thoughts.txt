@@ -13,3 +13,9 @@ resisting the torque actor.
 
 - constrain legs
 - rerun sim
+
+unable to rerun sim
+- successfully developed and tested running from checkpoint
+
+Attempt 3:
+Constrain legs to planar motion, rerun sim
