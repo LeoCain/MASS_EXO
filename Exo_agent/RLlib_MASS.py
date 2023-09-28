@@ -68,6 +68,16 @@ class Exo_Trainer():
         self.checkpoint_path = ""
         self.plot_start = 1
 
+        ### creates variables to track the values and checkpoint numbers for high performing iterations ###
+        self.highest_minimum_achieved = 0
+        self.highest_minimum_achieved_checkpoint = 1
+
+        self.highest_average_achieved = 0
+        self.highest_average_achieved_checkpoint = 1
+
+        self.highest_max_achieved = 0
+        self.highest_max_achieved_checkpoint = 1
+
         if mode == 'tune':
             # tunes hyperparameters - not rigorously tested, but should only be used
             # once reward function and simulation are good and getting decent results.
@@ -231,7 +241,7 @@ class Exo_Trainer():
             self.epochs += 1
             self.plot_reward(result["episode_reward_min"], result["episode_reward_mean"], result["episode_reward_max"])
             # agent is stopped and reloaded every 25 epochs because RLlib rollout workers have a memory leak (as of 2022)
-            if n%25==0 and not n==0:
+            if n_iter%25==0 and not n_iter==0:
                 print("========stopping...===========")
                 self.agent.stop()
                 time.sleep(1)
@@ -267,6 +277,22 @@ class Exo_Trainer():
         """
         Plots the reward and saves the figure, overwriting previous one
         """
+        
+        if min > self.highest_minimum_achieved:
+            self.highest_minimum_achieved = min
+            self.highest_minimum_achieved_checkpoint = self.epochs
+
+        if mean > self.highest_average_achieved:
+            self.highest_average_achieved = mean
+            self.highest_average_achieved_checkpoint = self.epochs
+
+        if max > self.highest_max_achieved:
+            self.highest_max_achieved = max
+            self.highest_max_achieved_checkpoint = self.epochs
+            
+        print("Highest Minimum Achieved: ", self.highest_minimum_achieved, " (Checkpoint ", self.highest_minimum_achieved_checkpoint, ")")
+        print("Highest Average Achieved: ", self.highest_average_achieved, " (Checkpoint ", self.highest_average_achieved_checkpoint, ")")
+        print("Highest Maximum Achieved: ", self.highest_max_achieved, " (Checkpoint ", self.highest_max_achieved_checkpoint, ")")
 
         self.min_rewards.append(min)
         self.max_rewards.append(max)
@@ -286,6 +312,8 @@ class Exo_Trainer():
         plt.ylabel("Reward")
         plt.legend(loc='upper left')
         plt.savefig("/home/medicalrobotics/Anton/MASS_EXO/Exo_agent/Plots/RewardPlot_torch.png")
+
+
 
 
 def debug():

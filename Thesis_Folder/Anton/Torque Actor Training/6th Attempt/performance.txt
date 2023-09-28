@@ -1,0 +1,3 @@
+Highest Minimum Achieved:  46.90809667008779  (Checkpoint  156 )
+Highest Average Achieved:  78.40870954212299  (Checkpoint  1526 )
+Highest Maximum Achieved:  127.32453387988997  (Checkpoint  1575 )

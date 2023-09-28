@@ -11,7 +11,7 @@ python3 Exo_agent/RLlib_MASS.py
 
 Run exo (Body Weight Support): 
 cd build
-./Exo_agent/exo_render ../data/metadata_bws_crip_knee_hip.txt ../nn/max.pt ../nn/max_muscle.pt ../Exo_agent/policies/checkpoint_002000
+./Exo_agent/exo_render ../data/metadata_bws_crip_knee_hip_EXO.txt ../nn/max.pt ../nn/max_muscle.pt ../Exo_agent/policies/checkpoint_002000
 
 
 muscle_bws_crip_knee_hip.xml:

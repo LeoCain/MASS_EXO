@@ -19,3 +19,17 @@ unable to rerun sim
 
 Attempt 3:
 Constrain legs to planar motion, rerun sim
+- constraining legs worked but torque actor is still too sporatic
+
+Attempt 4:
+keep legs constrained, add torque magnitude parameter to reward function
+- performance was even worse
+- updated code to return maximum checkpoints for future analysis
+
+Attempt 5:
+Updating reward function to only deal with trajectories and torque smoothness
+- something seems wrong with the torque smoothness paparmeter
+- going to investigate torque smoothness parameter to find faults. 
+
+attempt 6:
+- applied torque is much smoother than previous iterations but there is clearly a lot of room for improvement. 

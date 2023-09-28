@@ -14,7 +14,7 @@
         <Body type="Box" mass="7.0" size="0.1271 0.4043 0.1398" contact="Off" color="0.3 0.3 1.5 1.0" obj="R_Femur.obj">
             <Transformation linear="0.9998 -0.0174 -0.0024 -0.0175 -0.9997 -0.0172 -0.21 0.0172 -0.9998 " translation="-0.0959 0.7241 -0.0227 "/>
         </Body>
-        <Joint type="Ball" bvh="Character1_RightUpLeg" lower="-2.0 -2.0 -2.0" upper="2.0 2.0 2.0">
+        <Joint type="Ball" bvh="Character1_RightUpLeg" lower="-2.0 -2.0 0.0" upper="2.0 2.0 0.0">
             <Transformation linear="1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0" translation="-0.0903 0.9337 -0.0116 "/>
         </Joint>
     </Node>
@@ -74,7 +74,7 @@
         <Body type="Box" mass="7.0" size="0.1271 0.4043 0.1398" contact="Off" color="0.6 0.6 1.5 1.0"  obj="L_Femur.obj">
             <Transformation linear="0.9998 -0.0174 -0.0024 0.0175 0.9997 0.0172 0.21 -0.0172 0.9998 " translation="0.0959 0.7241 -0.0227 "/>
         </Body>
-        <Joint type="Ball" bvh="Character1_LeftUpLeg" lower="-2.0 -2.0 -2.0" upper="2.0 2.0 2.0">
+        <Joint type="Ball" bvh="Character1_LeftUpLeg" lower="-2.0 -2.0 0.0" upper="2.0 2.0 0.0">
             <Transformation linear="1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0" translation="0.0903 0.9337 -0.0116 "/>
         </Joint>
     </Node>
