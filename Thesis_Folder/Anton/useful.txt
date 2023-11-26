@@ -1,0 +1,37 @@
+Train Skeleton (Body Weight Support):
+python3 main.py -d ../data/metadata_bws_crip_knee_hip.txt
+
+Run Skeleton (Body Weight Support):
+cd build
+./render/render ../data/metadata_bws_crip_knee_hip.txt ../nn/max.pt ../nn/max_muscle.pt
+
+Train Exo (Body Weight Support):
+cd MASS_EXO
+python3 Exo_agent/RLlib_MASS.py
+
+Run exo (Body Weight Support): 
+cd build
+./Exo_agent/exo_render ../data/metadata_bws_crip_knee_hip_EXO.txt ../nn/max.pt ../nn/max_muscle.pt ../Exo_agent/policies/checkpoint_002000
+
+
+muscle_bws_crip_knee_hip.xml:
+L_Adductor_Magnus (10% Strength)
+L_Bicep_Femoris_Longus (10% Strength)
+L_Bicep_Femoris_Short (10% Strength)
+L_Extensor_Digitorum_Longus (10% Strength)
+L_Extensor_Hallucis_Longus (10% Strength)
+L_Flexor_Digitorum_Longus (10% Strength)
+L_Gastrocnemius_Lateral_Head (10% Strength)
+L_Gluteus_Maximus (10% Strength)
+L_Gracilis (10% Strength)
+L_Plantaris (10% Strength)
+L_Popliteus (10% Strength)
+L_Rectus_Femoris (10% Strength)
+L_Sartorius (10% Strength)
+L_Semimembranosus (10% Strength)
+L_Semitendinosus (10% Strength)
+L_Soleus (10% Strength)
+L_Tibialis_Anterior (10% Strength)
+L_Vastus_Intermedius (10% Strength)
+L_Vastus_Lateralis (10% Strength)
+L_Vastus_Medialis (10% Strength)

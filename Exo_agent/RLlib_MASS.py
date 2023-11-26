@@ -55,15 +55,45 @@ class Exo_Trainer():
         # register custom env and NN
         ModelCatalog.register_custom_model("Actor_NN", Actor_NN)
         register_env("MASS_env", MASS_env)
-        self.metafile_path = "/home/medicalrobotics/Anton/MASS_EXO/data/metadatabws.txt"
+        self.metafile_path = "/home/medicalrobotics/Anton/MASS_EXO/data/metadata_bws_crip_knee_hip_EXO.txt"
         self.sim_NN_path = "/home/medicalrobotics/Anton/MASS_EXO/nn/max.pt"
         self.muscle_NN_path = "/home/medicalrobotics/Anton/MASS_EXO/nn/max_muscle.pt"
+        self.restore = restore_agent
+
+        ### create lists to store previous rewards, and an epoch counter ###
+        self.min_rewards = []
+        self.max_rewards = []
+        self.mean_rewards = []
+        self.epochs = 0
+        self.checkpoint_path = ""
+        self.plot_start = 1
+
+        ### creates variables to track the values and checkpoint numbers for high performing iterations ###
+        self.highest_minimum_achieved = 0
+        self.highest_minimum_achieved_checkpoint = 1
+
+        self.highest_average_achieved = 0
+        self.highest_average_achieved_checkpoint = 1
+
+        self.highest_max_achieved = 0
+        self.highest_max_achieved_checkpoint = 1
+
         if mode == 'tune':
             # tunes hyperparameters - not rigorously tested, but should only be used
             # once reward function and simulation are good and getting decent results.
             # i.e. the actor should work - the tuner is just for further optimisation
             self.tuner = self.Initialise_Tuner()
         elif mode == 'train':
+
+            if restore_agent:
+                checkpoint_path = input("Enter the checkpoint path that you would like to restore from: ")
+                checkpoint_number = input("Enter the checkpoint number: ")
+
+                self.checkpoint_path = checkpoint_path
+                self.epochs = int(checkpoint_number)
+                self.plot_start = self.epochs + 1
+
+                
             self.config = {
                 "env": MASS_env,
                 "env_config": {
@@ -98,16 +128,11 @@ class Exo_Trainer():
             self.agent = ppo.PPO(config=self.ppo_config)
             print(f"************{self.ppo_config}*********")
             print(f"============config applied ================")
-            if restore_agent:
-                pass
+
         else:
             print("invalid mode entered")
 
-        ### create lists to store previous rewards, and an epoch counter ###
-        self.min_rewards = []
-        self.max_rewards = []
-        self.mean_rewards = []
-        self.epochs = 0
+        
 
     def Initialise_Tuner(self):
         """
@@ -195,15 +220,28 @@ class Exo_Trainer():
         Train the agent for n iterations
         """
         status = "{:2d} reward {:6.2f}/{:6.2f}/{:6.2f} len {:4.2f} saved {}"
-        n_iter = n
-        for n in range(n_iter):
+        n_iter = self.epochs
+        while n_iter < n:
+            if self.restore == True:
+                
+                print("========stopping...===========")
+                self.agent.stop()
+                time.sleep(1)
+                print("========stopped, reloading...===========")
+                self.agent = ppo.PPO(config=self.ppo_config)
+                print("========Reloaded===========")
+                self.Restore_Agent(self.checkpoint_path)
+                
+                self.restore = False
+                
+            
             # print(n)
             result = self.agent.train()
             chkpt_file = self.agent.save(self.policy_path)
             self.epochs += 1
             self.plot_reward(result["episode_reward_min"], result["episode_reward_mean"], result["episode_reward_max"])
             # agent is stopped and reloaded every 25 epochs because RLlib rollout workers have a memory leak (as of 2022)
-            if n%25==0 and not n==0:
+            if n_iter%25==0 and not n_iter==0:
                 print("========stopping...===========")
                 self.agent.stop()
                 time.sleep(1)
@@ -212,13 +250,14 @@ class Exo_Trainer():
                 print("========Reloaded===========")
                 self.Restore_Agent(chkpt_file)
             print(status.format(
-                    n + 1,
+                    n_iter + 1,
                     result["episode_reward_min"],
                     result["episode_reward_mean"],
                     result["episode_reward_max"],
                     result["episode_len_mean"], 
                     chkpt_file
                     ))
+            n_iter += 1
 
     def Restore_Agent(self, path):
         """
@@ -238,15 +277,36 @@ class Exo_Trainer():
         """
         Plots the reward and saves the figure, overwriting previous one
         """
+        
+        if min > self.highest_minimum_achieved:
+            self.highest_minimum_achieved = min
+            self.highest_minimum_achieved_checkpoint = self.epochs
+
+        if mean > self.highest_average_achieved:
+            self.highest_average_achieved = mean
+            self.highest_average_achieved_checkpoint = self.epochs
+
+        if max > self.highest_max_achieved:
+            self.highest_max_achieved = max
+            self.highest_max_achieved_checkpoint = self.epochs
+            
+        print("Highest Minimum Achieved: ", self.highest_minimum_achieved, " (Checkpoint ", self.highest_minimum_achieved_checkpoint, ")")
+        print("Highest Average Achieved: ", self.highest_average_achieved, " (Checkpoint ", self.highest_average_achieved_checkpoint, ")")
+        print("Highest Maximum Achieved: ", self.highest_max_achieved, " (Checkpoint ", self.highest_max_achieved_checkpoint, ")")
+
         self.min_rewards.append(min)
         self.max_rewards.append(max)
         self.mean_rewards.append(mean)
-        epoch_space = np.linspace(1, self.epochs, self.epochs)
+
+        epoch_space = np.linspace(self.plot_start, self.epochs, len(self.min_rewards))
+
+        
 
         plt.clf()
         plt.plot(epoch_space, self.min_rewards, label = "Min episode reward", color="blue")
         plt.plot(epoch_space, self.max_rewards, label = "Max episode reward", color="red")
         plt.plot(epoch_space, self.mean_rewards, label = "Mean episode reward", color="orange")
+        # plt.xticks(epoch_space)
         plt.title("Episode Reward vs Number of Epochs (Torch)")
         plt.xlabel("Number of Epochs")
         plt.ylabel("Reward")
@@ -254,11 +314,14 @@ class Exo_Trainer():
         plt.savefig("/home/medicalrobotics/Anton/MASS_EXO/Exo_agent/Plots/RewardPlot_torch.png")
 
 
+
+
 def debug():
     ben = Exo_Trainer('train')
+    # ben = Exo_Trainer('train', restore_agent=True)
     # ben.Tune_Params()
-    ben.Train_Exo(5000)
-    # ben.Restore_Agent("/home/medicalrobotics/MASS_EXO/Exo_agent/policies_torch/checkpoint_000120")
-
+    ben.Train_Exo(10000)
+    # ben.Restore_Agent("/home/medicalrobotics/Anton/MASS_EXO/Exo_agent/policies/checkpoint_005000")
+    
 if __name__ == "__main__":
     debug()

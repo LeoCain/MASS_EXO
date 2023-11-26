@@ -1,0 +1,35 @@
+Attempt 1:
+muscle activation is smooth with just bws but choppy with torque actor applied. 
+Also noticed that there was no impaired bws model so the torque actor essentially had nothing to assit with
+
+- developed impaired bws model (metadata_bws_crip_knee_hip.txt)
+
+Attempt 2:
+Same as attempt 1 but with the impaired bws model
+muscled activations appear even more choppy, torque actor also appears to be overcompensating (leg swinging wildly)
+possible Issues: skeleton legs are not resisted by exoskeleton structure, this might be causing the torque actor to 
+overcompensate the leg to swing around into a position with a high reward. muscles nn is more than likely actively 
+resisting the torque actor.
+
+- constrain legs
+- rerun sim
+
+unable to rerun sim
+- successfully developed and tested running from checkpoint
+
+Attempt 3:
+Constrain legs to planar motion, rerun sim
+- constraining legs worked but torque actor is still too sporatic
+
+Attempt 4:
+keep legs constrained, add torque magnitude parameter to reward function
+- performance was even worse
+- updated code to return maximum checkpoints for future analysis
+
+Attempt 5:
+Updating reward function to only deal with trajectories and torque smoothness
+- something seems wrong with the torque smoothness paparmeter
+- going to investigate torque smoothness parameter to find faults. 
+
+attempt 6:
+- applied torque is much smoother than previous iterations but there is clearly a lot of room for improvement. 
